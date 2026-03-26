@@ -14,7 +14,7 @@ Accéder au backend :
 👉 http://localhost:3000
 
 
-▶️ Lancer le FRONTEND
+▶️ Lancer le FRONTEND --> changer de terminal c'est mieu 
 
 Aller dans le dossier Angular :
 cd frontend/frontend
