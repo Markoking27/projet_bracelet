@@ -27,4 +27,4 @@ ng serve
 
 Accéder au frontend :
 
-👉 http://localhost:55477/
+👉 http://localhost:4200/
