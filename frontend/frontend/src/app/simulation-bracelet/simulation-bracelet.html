@@ -1,0 +1,37 @@
+<div class="dashboard">
+  <h1>🩺 Simulation Bracelets</h1>
+  <p class="subtitle">Mise à jour toutes les 2 secondes</p>
+
+  <div class="bracelets-grid" *ngIf="braceletsEnAlerte().length > 0; else aucuneAlerte">
+    <div
+      class="bracelet-card"
+      *ngFor="let b of braceletsEnAlerte()"
+      [ngClass]="getLevelClass(b.level)"
+    >
+      <div class="bracelet-header">
+        <span class="bracelet-id">Bracelet #{{ b.id }}</span>
+        <span class="bracelet-status">{{ getLevelLabel(b.level) }}</span>
+      </div>
+
+      <div class="bracelet-body">
+        <div class="indicator">
+          <span class="dot" [ngClass]="getLevelClass(b.level)"></span>
+          <span>Niveau : <strong>{{ b.level }}</strong></span>
+        </div>
+
+        <div class="malaise" *ngIf="b.malaise; else noMalaise">
+          ⚠️ Malaise détecté : <strong>{{ b.malaise }}</strong>
+        </div>
+        <ng-template #noMalaise>
+          <div class="no-malaise">Surveillance en cours...</div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #aucuneAlerte>
+    <div class="all-clear">
+      ✅ Tous les bracelets sont normaux
+    </div>
+  </ng-template>
+</div>
