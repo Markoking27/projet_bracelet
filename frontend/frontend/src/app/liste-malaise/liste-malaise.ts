@@ -1,11 +1,17 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MalaiseService } from '../services/malaise.service';
 
 @Component({
   selector: 'app-liste-malaise',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './liste-malaise.html',
-  styleUrl: './liste-malaise.scss',
+  styleUrl: './liste-malaise.scss'
 })
 export class ListeMalaise {
 
+  constructor(public malaiseService: MalaiseService) {}
+
 }
+
