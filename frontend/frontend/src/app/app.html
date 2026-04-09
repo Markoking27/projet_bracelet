@@ -1,22 +1,25 @@
-<<<<<<< HEAD
-<h1> Frontend configuré<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-</head>
-<body>
-  
-</body>
-</html></h1>
-=======
-<h1>Frontend configuré</h1>
+<nav class="navbar">
+  <div class="logo">
+    <img src="assets/logo.png" alt="logo" />
+  </div>
 
-<nav>
-  <a routerLink="/home">Accueil</a> |
-  <a routerLink="/simulator">Simulation bracelets</a>
+  <div class="nav-links">
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+      Accueil
+    </a>
+
+    <a routerLink="/liste-malaise" routerLinkActive="active">
+      Liste des malaises
+    </a>
+  </div>
+
+  <div class="nav-action">
+    <button routerLink="/formulaire-malaise">
+      Signaler un malaise
+    </button>
+  </div>
 </nav>
 
+
+
 <router-outlet></router-outlet>
->>>>>>> 0f23c95064f9bbcaf0141857daab1f8f43552b85
