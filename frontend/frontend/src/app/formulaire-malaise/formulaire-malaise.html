@@ -1,1 +1,165 @@
-<p>formulaire-malaise works!</p>
+<div class="container">
+  <h2>Signalement de Malaise</h2>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+    <!-- TYPOLOGIE -->
+    <div class="section">
+      <h3>Typologie des malaises</h3>
+
+      <div class="inline">
+        <label *ngFor="let t of ['vagal','déshydratation','hypoglycémie','chaleur','alcool','chute','autre']">
+          <input type="radio" formControlName="typeMalaise" [value]="t"> {{ t }}
+        </label>
+      </div>
+
+      <div *ngIf="isInvalid('typeMalaise')" class="error">Champ obligatoire</div>
+
+      <div *ngIf="form.value.typeMalaise === 'autre'">
+        <input type="text" formControlName="autreType" placeholder="Précisez">
+        <div *ngIf="isInvalid('autreType')" class="error">Champ obligatoire</div>
+      </div>
+    </div>
+
+    <!-- PROFIL -->
+    <div class="section">
+      <h3>Profil</h3>
+
+      <p>Sexe</p>
+      <div class="inline">
+        <label><input type="radio" formControlName="sexe" value="femme"> Femme</label>
+        <label><input type="radio" formControlName="sexe" value="homme"> Homme</label>
+        <label><input type="radio" formControlName="sexe" value="np"> Non précisé</label>
+      </div>
+      <div *ngIf="isInvalid('sexe')" class="error">Champ obligatoire</div>
+
+      <p>Tranche d'âge</p>
+      <div class="inline">
+        <label><input type="radio" formControlName="trancheAge" value="-18"> -18</label>
+        <label><input type="radio" formControlName="trancheAge" value="18-25"> 18-25</label>
+        <label><input type="radio" formControlName="trancheAge" value="26-40"> 26-40</label>
+        <label><input type="radio" formControlName="trancheAge" value="41-60"> 41-60</label>
+        <label><input type="radio" formControlName="trancheAge" value="+60"> +60</label>
+      </div>
+      <div *ngIf="isInvalid('trancheAge')" class="error">Champ obligatoire</div>
+    </div>
+
+    <!-- CONTEXTE SPATIAL -->
+    <div class="section">
+      <h3>Contexte spatial</h3>
+
+      <div class="inline">
+        <label><input type="radio" formControlName="zone" value="avant"> Devant scène</label>
+        <label><input type="radio" formControlName="zone" value="milieu"> Milieu</label>
+        <label><input type="radio" formControlName="zone" value="arriere"> Arrière</label>
+        <label><input type="radio" formControlName="zone" value="annexe"> Zone annexe</label>
+      </div>
+
+      <div *ngIf="isInvalid('zone')" class="error">Champ obligatoire</div>
+
+      <div *ngIf="form.value.zone === 'annexe'">
+        <input type="text" formControlName="zoneDetail" placeholder="Précisez">
+        <div *ngIf="isInvalid('zoneDetail')" class="error">Champ obligatoire</div>
+      </div>
+
+      <p>Densité</p>
+      <div class="inline">
+        <label><input type="radio" formControlName="densite" value="faible"> Faible</label>
+        <label><input type="radio" formControlName="densite" value="moyenne"> Moyenne</label>
+        <label><input type="radio" formControlName="densite" value="forte"> Forte</label>
+      </div>
+
+      <div *ngIf="isInvalid('densite')" class="error">Champ obligatoire</div>
+    </div>
+
+    <!-- CONTEXTE EVENEMENT -->
+    <div class="section">
+      <h3>Contexte événementiel</h3>
+
+      <select formControlName="typeEvent">
+        <option value="">-- Choisir --</option>
+        <option value="musique">Musique</option>
+        <option value="sport">Sport</option>
+        <option value="politique">Politique</option>
+        <option value="autre">Autre</option>
+      </select>
+
+      <div *ngIf="isInvalid('typeEvent')" class="error">Champ obligatoire</div>
+
+      <div *ngIf="form.value.typeEvent === 'autre'">
+        <input type="text" formControlName="autreEvent" placeholder="Précisez">
+        <div *ngIf="isInvalid('autreEvent')" class="error">Champ obligatoire</div>
+      </div>
+
+      <p>Sous-type (optionnel)</p>
+      <input type="text" formControlName="sousType" placeholder="Ex: concert rock, foot...">
+    </div>
+
+    <!-- GRAVITE -->
+    <div class="section">
+      <h3>Gravité</h3>
+
+      <div class="inline">
+        <label><input type="radio" formControlName="gravite" value="faible"> Faible</label>
+        <label><input type="radio" formControlName="gravite" value="moderee"> Modérée</label>
+        <label><input type="radio" formControlName="gravite" value="elevee"> Élevée</label>
+      </div>
+
+      <div *ngIf="isInvalid('gravite')" class="error">Champ obligatoire</div>
+    </div>
+
+    <!-- INTERVENTION -->
+    <div class="section">
+      <h3>Issue de l’intervention</h3>
+
+      <p>Intervention</p>
+      <div class="inline">
+        <label><input type="radio" formControlName="intervention" value="place"> Sur place</label>
+        <label><input type="radio" formControlName="intervention" value="ambulance"> Ambulance</label>
+      </div>
+
+      <p>Temps de prise</p>
+      <div class="inline">
+        <label><input type="radio" formControlName="tempsPrise" value="<10"> <10 min</label>
+        <label><input type="radio" formControlName="tempsPrise" value="10-20"> 10-20 min</label>
+        <label><input type="radio" formControlName="tempsPrise" value=">20"> >20 min</label>
+      </div>
+
+      <p>Alcoolémie</p>
+      <div class="inline">
+        <label><input type="radio" formControlName="alcool" value="none"> Non mesuré</label>
+        <label><input type="radio" formControlName="alcool" value="faible"> Faible</label>
+        <label><input type="radio" formControlName="alcool" value="modere"> Modéré</label>
+        <label><input type="radio" formControlName="alcool" value="eleve"> Élevé</label>
+      </div>
+
+      <div *ngIf="isInvalid('intervention') || isInvalid('tempsPrise') || isInvalid('alcool')" class="error">
+        Tous les champs sont obligatoires
+      </div>
+    </div>
+
+    <!-- HEURE -->
+    <div class="section">
+      <h3>Heure</h3>
+
+      <div class="inline">
+        <select formControlName="heure">
+          <option value="">HH</option>
+          <option *ngFor="let h of heures" [value]="h">{{ h }}</option>
+        </select>
+
+        <select formControlName="minute">
+          <option value="">MM</option>
+          <option *ngFor="let m of minutes" [value]="m">{{ m }}</option>
+        </select>
+      </div>
+
+      <div *ngIf="isInvalid('heure') || isInvalid('minute')" class="error">
+        Heure obligatoire
+      </div>
+    </div>
+
+    <button class="btn" type="submit">Valider</button>
+
+  </form>
+</div>
