@@ -15,6 +15,14 @@ export const routes: Routes = [
       import('./simulation-bracelet/simulation-bracelet')
         .then(m => m.SimulationBracelet)
   },
+
+  // DESIGN-TEST — retirer ce bloc pour supprimer le dashboard
+  {
+    path: 'design-test',
+    loadComponent: () =>
+      import('./design-test/dashboard/dashboard')
+        .then(m => m.DashboardComponent)
+  },
 ];
 
 @NgModule({

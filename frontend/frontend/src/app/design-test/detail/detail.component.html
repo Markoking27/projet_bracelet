@@ -1,0 +1,160 @@
+<!-- DESIGN-TEST -->
+<div class="dt-detail" role="complementary" [attr.aria-label]="'Détails du bracelet ' + bracelet().id">
+
+  <!-- Header -->
+  <div class="dt-detail__header">
+    <div class="dt-detail__id">
+      <span class="dt-detail__num">B{{ bracelet().id < 10 ? '0' + bracelet().id : bracelet().id }}</span>
+      <span class="dt-badge" [class]="'dt-badge--' + levelClass(bracelet().level)">
+        {{ levelLabel(bracelet().level) }}
+      </span>
+    </div>
+    <button
+      class="dt-close-btn"
+      (click)="close.emit()"
+      aria-label="Fermer le panneau de détails"
+    >
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+        <line x1="2" y1="2" x2="16" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <line x1="16" y1="2" x2="2" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+
+  @if (bracelet().malaise) {
+    <div class="dt-malaise-alert" role="alert">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <path d="M8 1L15 14H1L8 1Z" stroke="#f97316" stroke-width="1.5" fill="rgba(249,115,22,0.1)"/>
+        <line x1="8" y1="6" x2="8" y2="9" stroke="#f97316" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="8" cy="11.5" r="0.75" fill="#f97316"/>
+      </svg>
+      <span>{{ bracelet().malaise }}</span>
+    </div>
+  }
+
+  <!-- Live vitals row -->
+  <div class="dt-vitals-row">
+    <div class="dt-vital dt-vital--bpm">
+      <span class="dt-vital__val" aria-label="Fréquence cardiaque {{ bracelet().bpm }} BPM">{{ bracelet().bpm }}</span>
+      <span class="dt-vital__unit">BPM</span>
+    </div>
+    <div class="dt-vital dt-vital--spo2">
+      <span class="dt-vital__val" aria-label="Saturation {{ bracelet().spo2 }} pourcent">{{ bracelet().spo2 }}</span>
+      <span class="dt-vital__unit">SpO₂%</span>
+    </div>
+    <div class="dt-vital dt-vital--temp">
+      <span class="dt-vital__val" aria-label="Température {{ bracelet().temp }} degrés">{{ bracelet().temp }}</span>
+      <span class="dt-vital__unit">°C</span>
+    </div>
+  </div>
+
+  <!-- Divider -->
+  <div class="dt-section-label">HISTORIQUE — 60 DERNIÈRES MESURES</div>
+
+  <!-- BPM Chart -->
+  <div class="dt-chart-block">
+    <div class="dt-chart-header">
+      <span class="dt-chart-title">FRÉQUENCE CARDIAQUE</span>
+      <div class="dt-chart-range">
+        <span>{{ minVal(bracelet().history.bpm) }}</span>
+        <span class="dt-chart-range-sep">—</span>
+        <span>{{ maxVal(bracelet().history.bpm) }} bpm</span>
+      </div>
+    </div>
+    <svg class="dt-chart-svg" viewBox="0 0 400 70" preserveAspectRatio="none"
+         role="img" aria-label="Courbe BPM">
+      <defs>
+        <linearGradient id="dt-grad-bpm" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ef4444" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="#ef4444" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <line x1="0" y1="18" x2="400" y2="18" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+      <line x1="0" y1="35" x2="400" y2="35" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+      <line x1="0" y1="52" x2="400" y2="52" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+      <path [attr.d]="buildArea(bracelet().history.bpm, 400, 70)" fill="url(#dt-grad-bpm)"/>
+      <path [attr.d]="buildPath(bracelet().history.bpm, 400, 70)"
+            fill="none" stroke="#ef4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+
+  <!-- SpO2 Chart -->
+  <div class="dt-chart-block">
+    <div class="dt-chart-header">
+      <span class="dt-chart-title">SATURATION SpO₂</span>
+      <div class="dt-chart-range">
+        <span>{{ minVal(bracelet().history.spo2) }}</span>
+        <span class="dt-chart-range-sep">—</span>
+        <span>{{ maxVal(bracelet().history.spo2) }} %</span>
+      </div>
+    </div>
+    <svg class="dt-chart-svg" viewBox="0 0 400 70" preserveAspectRatio="none"
+         role="img" aria-label="Courbe SpO2">
+      <defs>
+        <linearGradient id="dt-grad-spo2" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="#22d3ee" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <line x1="0" y1="18" x2="400" y2="18" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+      <line x1="0" y1="35" x2="400" y2="35" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+      <line x1="0" y1="52" x2="400" y2="52" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+      <path [attr.d]="buildArea(bracelet().history.spo2, 400, 70)" fill="url(#dt-grad-spo2)"/>
+      <path [attr.d]="buildPath(bracelet().history.spo2, 400, 70)"
+            fill="none" stroke="#22d3ee" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+
+  <!-- Temperature Chart -->
+  <div class="dt-chart-block">
+    <div class="dt-chart-header">
+      <span class="dt-chart-title">TEMPÉRATURE CORPORELLE</span>
+      <div class="dt-chart-range">
+        <span>{{ minVal(bracelet().history.temp) }}</span>
+        <span class="dt-chart-range-sep">—</span>
+        <span>{{ maxVal(bracelet().history.temp) }} °C</span>
+      </div>
+    </div>
+    <svg class="dt-chart-svg" viewBox="0 0 400 70" preserveAspectRatio="none"
+         role="img" aria-label="Courbe température">
+      <defs>
+        <linearGradient id="dt-grad-temp" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <line x1="0" y1="18" x2="400" y2="18" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+      <line x1="0" y1="35" x2="400" y2="35" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+      <line x1="0" y1="52" x2="400" y2="52" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+      <path [attr.d]="buildArea(bracelet().history.temp, 400, 70)" fill="url(#dt-grad-temp)"/>
+      <path [attr.d]="buildPath(bracelet().history.temp, 400, 70)"
+            fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+
+  <!-- RSSI Signal -->
+  <div class="dt-section-label">SIGNAL RSSI</div>
+  <div class="dt-rssi-grid">
+    @for (r of bracelet().rssi; track r.id) {
+      <div class="dt-rssi-item">
+        <div class="dt-rssi-header">
+          <span class="dt-rssi-anchor">{{ r.id }}</span>
+          <span class="dt-rssi-val" aria-label="Signal {{ r.id }} : {{ r.value }} dBm">{{ r.value }} dBm</span>
+        </div>
+        <div class="dt-rssi-bar" role="progressbar" [attr.aria-valuenow]="rssiBar(r.value)"
+             aria-valuemin="0" aria-valuemax="100">
+          <div class="dt-rssi-fill" [style.width.%]="rssiBar(r.value)"></div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Position -->
+  <div class="dt-section-label">POSITION ESTIMÉE</div>
+  <div class="dt-position">
+    <span class="dt-pos-label">X</span><span class="dt-pos-val">{{ bracelet().x }}</span>
+    <span class="dt-pos-sep">/</span>
+    <span class="dt-pos-label">Y</span><span class="dt-pos-val">{{ bracelet().y }}</span>
+  </div>
+
+</div>

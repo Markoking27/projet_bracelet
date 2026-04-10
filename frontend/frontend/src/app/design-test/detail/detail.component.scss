@@ -1,0 +1,247 @@
+// DESIGN-TEST
+.dt-detail {
+  height: 100%;
+  overflow-y: auto;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(37,99,235,0.3) transparent;
+}
+
+/* ── Header ── */
+.dt-detail__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dt-detail__id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.dt-detail__num {
+  font-family: 'Fira Code', monospace;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  letter-spacing: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.dt-badge {
+  padding: 0.25rem 0.6rem;
+  border-radius: 3px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+
+  &--normal    { background: rgba(34,197,94,0.15);  color: #22c55e; border: 1px solid rgba(34,197,94,0.3); }
+  &--attention { background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
+  &--alerte    { background: rgba(249,115,22,0.15); color: #f97316; border: 1px solid rgba(249,115,22,0.3); }
+  &--urgence   { background: rgba(239,68,68,0.15);  color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
+}
+
+/* ── Close button ── */
+.dt-close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 4px;
+  color: #64748b;
+  cursor: pointer;
+  transition: color 150ms ease, border-color 150ms ease, background-color 150ms ease;
+
+  &:hover {
+    color: #e2e8f0;
+    border-color: rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.08);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+  }
+}
+
+/* ── Malaise alert ── */
+.dt-malaise-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  background: rgba(249,115,22,0.08);
+  border: 1px solid rgba(249,115,22,0.3);
+  border-radius: 4px;
+  color: #f97316;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+/* ── Live vitals ── */
+.dt-vitals-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.dt-vital {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem 0.5rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 4px;
+
+  &__val {
+    font-family: 'Fira Code', monospace;
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+  }
+
+  &__unit {
+    font-family: 'Fira Sans', sans-serif;
+    font-size: 0.65rem;
+    color: #475569;
+    letter-spacing: 1.5px;
+    margin-top: 0.2rem;
+  }
+
+  &--bpm  .dt-vital__val { color: #ef4444; }
+  &--spo2 .dt-vital__val { color: #22d3ee; }
+  &--temp .dt-vital__val { color: #f59e0b; }
+}
+
+/* ── Section label ── */
+.dt-section-label {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: #334155;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid rgba(37,99,235,0.12);
+}
+
+/* ── Charts ── */
+.dt-chart-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.dt-chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dt-chart-title {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  color: #475569;
+  letter-spacing: 2px;
+}
+
+.dt-chart-range {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  color: #334155;
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  gap: 0.3rem;
+
+  &-sep { color: #1e293b; }
+}
+
+.dt-chart-svg {
+  width: 100%;
+  height: 70px;
+  background: rgba(255,255,255,0.015);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+/* ── RSSI ── */
+.dt-rssi-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dt-rssi-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.dt-rssi-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.dt-rssi-anchor {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  color: #2563eb;
+  letter-spacing: 2px;
+}
+
+.dt-rssi-val {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  color: #475569;
+  font-variant-numeric: tabular-nums;
+}
+
+.dt-rssi-bar {
+  height: 4px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.dt-rssi-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #1d4ed8, #2563eb);
+  border-radius: 2px;
+  transition: width 500ms ease;
+}
+
+/* ── Position ── */
+.dt-position {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'Fira Code', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.dt-pos-label {
+  font-size: 0.65rem;
+  color: #334155;
+  letter-spacing: 2px;
+}
+
+.dt-pos-val {
+  font-size: 0.85rem;
+  color: #64748b;
+  min-width: 2.5rem;
+}
+
+.dt-pos-sep {
+  color: #1e293b;
+}
