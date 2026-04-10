@@ -4,9 +4,23 @@ import { Observable } from 'rxjs';
 
 
 export interface Bracelet {
+
   id: number;
+  name?: string;
   level: number;
   malaise: string | null;
+
+  fc?: number;
+  hrv?: number;
+  temperature?: number;
+
+  x?: number;
+  y?: number;
+
+  fcHistory?: number[];
+  hrvHistory?: number[];
+  temperatureHistory?: number[];
+  labels?: string[];
 }
 
 @Injectable({

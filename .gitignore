@@ -1,2 +1,6 @@
 #Python 
 *.pyc
+node_modules/
+dist/
+.angular/
+coverage/

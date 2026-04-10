@@ -1,37 +1,270 @@
 <div class="dashboard">
-  <h1>🩺 Simulation Bracelets</h1>
-  <p class="subtitle">Mise à jour toutes les 2 secondes</p>
+  <h1>Tableau de bord de supervision</h1>
+  <p class="subtitle">Surveillance biométrique en temps réel</p>
 
-  <div class="bracelets-grid" *ngIf="braceletsEnAlerte().length > 0; else aucuneAlerte">
-    <div
-      class="bracelet-card"
-      *ngFor="let b of braceletsEnAlerte()"
-      [ngClass]="getLevelClass(b.level)"
-    >
-      <div class="bracelet-header">
-        <span class="bracelet-id">Bracelet #{{ b.id }}</span>
-        <span class="bracelet-status">{{ getLevelLabel(b.level) }}</span>
+  <!-- KPIs -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Bracelets actifs</div>
+      <div class="stat-value">{{ getActiveCount() }}</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">Alertes critiques</div>
+      <div class="stat-value danger-value">
+        {{ getCriticalAlertCount() }}
       </div>
+    </div>
 
-      <div class="bracelet-body">
-        <div class="indicator">
-          <span class="dot" [ngClass]="getLevelClass(b.level)"></span>
-          <span>Niveau : <strong>{{ b.level }}</strong></span>
+    <div class="stat-card">
+      <div class="stat-label">Alertes attention</div>
+      <div class="stat-value warning-value">
+          {{ getWarningAlertCount() }}
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">Zones à risque</div>
+      <div class="stat-value">{{ getRiskZoneCount() }}</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">Utilisateurs</div>
+      <div class="stat-value">{{ getActiveCount() }}</div>
+    </div>
+  </div>
+
+  <!-- Alertes + carte -->
+  <div class="dashboard-layout">
+    <!-- Colonne gauche -->
+    <section class="left-panel">
+      <div class="alerts-card">
+        <div class="alerts-header">
+          <h2>Alertes en temps réel</h2>
+          <span>{{ getAlertCount() }} alertes actives</span>
         </div>
 
-        <div class="malaise" *ngIf="b.malaise; else noMalaise">
-          ⚠️ Malaise détecté : <strong>{{ b.malaise }}</strong>
+        <div *ngIf="braceletsEnAlerte().length > 0; else aucuneAlerte">
+          <div
+            class="alert-item"
+            *ngFor="let b of braceletsEnAlerte()"
+            [ngClass]="getLevelClass(b.level)"
+            (click)="selectBracelet(b)"
+          >
+            <div class="alert-top">
+              <div class="alert-name">{{ getBraceletDisplayName(b) }}</div>
+              <span class="alert-badge" [ngClass]="getLevelClass(b.level)">
+                {{ getLevelLabel(b.level) }}
+              </span>
+            </div>
+
+            <div class="alert-type">
+              {{ b.malaise || 'Alerte détectée' }}
+            </div>
+
+            <div class="alert-description">
+              Surveillance d’un événement biométrique détecté
+            </div>
+
+            <div class="alert-footer">
+              <span>ID: BR-{{ b.id }}</span>
+            </div>
+          </div>
         </div>
-        <ng-template #noMalaise>
-          <div class="no-malaise">Surveillance en cours...</div>
+
+        <ng-template #aucuneAlerte>
+          <div class="all-clear">
+            ✅ Aucun bracelet en alerte
+          </div>
         </ng-template>
+      </div>
+    </section>
+
+    <!-- Colonne droite -->
+    <section class="right-panel">
+      <div class="map-card">
+        <div class="map-header">
+          <h2>Géolocalisation & Zones à risque</h2>
+
+          <div class="legend">
+            <span class="legend-item">
+              <span class="legend-dot normal"></span> Normal
+            </span>
+            <span class="legend-item">
+              <span class="legend-dot warning"></span> Attention
+            </span>
+            <span class="legend-item">
+              <span class="legend-dot danger"></span> Critique
+            </span>
+          </div>
+        </div>
+
+        <div class="geo-map">
+          <div
+            class="marker"
+            *ngFor="let b of braceletsAvecPosition()"
+            [ngStyle]="getMapPosition(b)"
+            (click)="selectBracelet(b)"
+            [title]="getBraceletDisplayName(b)"
+          >
+            <div class="pin-wrapper" [ngClass]="getLevelClass(b.level)" [class.selected]="isSelected(b)">
+              📍
+            </div>
+            <div class="marker-dot" [ngClass]="getLevelClass(b.level)"></div>
+
+            <div class="tooltip" *ngIf="isSelected(b)">
+              {{ getBraceletDisplayName(b) }}
+            </div>
+          </div>
+
+          <div class="empty-map-message" *ngIf="braceletsAvecPosition().length === 0">
+            Aucune position disponible pour le moment
+          </div>
+        </div>
+
+        <div class="map-footer">
+          {{ getActiveCount() }} bracelets actifs &nbsp;&nbsp; {{ getRiskZoneCount() }} zones à risque identifiées
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Tous les bracelets -->
+  <div class="all-bracelets-section">
+    <h2>Tous les bracelets</h2>
+
+    <div class="all-bracelets-grid">
+      <div
+        class="bracelet-summary-card"
+        *ngFor="let b of tousLesBracelets()"
+        (click)="selectBracelet(b)"
+        [class.selected]="isSelected(b)"
+      >
+        <div class="summary-top">
+          <div class="summary-name">
+            <span class="status-dot" [ngClass]="getLevelClass(b.level)"></span>
+            {{ getBraceletDisplayName(b) }}
+          </div>
+          <div class="summary-id">ID: BR-{{ b.id }}</div>
+        </div>
+
+        <div class="summary-grid">
+          <div class="summary-metric">
+            <div class="metric-label">FC</div>
+            <div class="metric-value">{{ b.fc ?? '--' }} bpm</div>
+          </div>
+
+          <div class="summary-metric">
+            <div class="metric-label">HRV</div>
+            <div class="metric-value">{{ b.hrv ?? '--' }} ms</div>
+          </div>
+
+          <div class="summary-metric">
+            <div class="metric-label">Temp</div>
+            <div class="metric-value">{{ b.temperature ?? '--' }} °C</div>
+          </div>
+
+          <div class="summary-metric">
+            <div class="metric-label">Position</div>
+            <div class="metric-value">
+              <span *ngIf="b.x !== undefined && b.y !== undefined; else noPosition">
+                x: {{ b.x }} / y: {{ b.y }}
+              </span>
+              <ng-template #noPosition>--</ng-template>
+            </div>
+          </div>
+        </div>
+
+        <div class="summary-alert" *ngIf="b.level > 0">
+          {{ b.malaise || 'Attention requise' }}
+        </div>
       </div>
     </div>
   </div>
 
-  <ng-template #aucuneAlerte>
-    <div class="all-clear">
-      ✅ Tous les bracelets sont normaux
+  <!-- Détails bracelet sélectionné -->
+  <div class="details-card" *ngIf="selectedBracelet as b">
+    <h2>Données biométriques - {{ getBraceletDisplayName(b) }}</h2>
+
+    <div class="details-grid">
+      <div class="detail-box">
+        <div class="detail-label">Fréquence cardiaque</div>
+        <div class="detail-value">{{ b.fc ?? '--' }} bpm</div>
+      </div>
+
+      <div class="detail-box">
+        <div class="detail-label">HRV</div>
+        <div class="detail-value">{{ b.hrv ?? '--' }} ms</div>
+      </div>
+
+      <div class="detail-box">
+        <div class="detail-label">Température</div>
+        <div class="detail-value">{{ b.temperature ?? '--' }} °C</div>
+      </div>
+
+      <div class="detail-box">
+        <div class="detail-label">Malaise</div>
+        <div class="detail-value">{{ b.malaise || 'Aucun' }}</div>
+      </div>
+
+      <div class="detail-box">
+        <div class="detail-label">Niveau</div>
+        <div class="detail-value">{{ getLevelLabel(b.level) }}</div>
+      </div>
+
+      <div class="detail-box">
+        <div class="detail-label">Position</div>
+        <div class="detail-value">
+          <span *ngIf="b.x !== undefined && b.y !== undefined; else noPositionDetail">
+            x: {{ b.x }} / y: {{ b.y }}
+          </span>
+          <ng-template #noPositionDetail>--</ng-template>
+        </div>
+      </div>
     </div>
-  </ng-template>
+
+    <div class="charts-section" *ngIf="hasChartData(b); else noCharts">
+      <div class="chart-block">
+        <h3>Fréquence cardiaque (bpm)</h3>
+        <div class="chart-wrapper">
+          <canvas
+            baseChart
+            [data]="fcChartData"
+            [options]="lineChartOptions"
+            [type]="lineChartType">
+          </canvas>
+        </div>
+      </div>
+
+      <div class="chart-block">
+        <h3>Variabilité cardiaque HRV (ms)</h3>
+        <div class="chart-wrapper">
+          <canvas
+            baseChart
+            [data]="hrvChartData"
+            [options]="lineChartOptions"
+            [type]="lineChartType">
+          </canvas>
+        </div>
+      </div>
+
+      <div class="chart-block">
+        <h3>Température cutanée (°C)</h3>
+        <div class="chart-wrapper">
+          <canvas
+            baseChart
+            [data]="tempChartData"
+            [options]="lineChartOptions"
+            [type]="lineChartType">
+          </canvas>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #noCharts>
+      <div class="charts-placeholder">
+        <p><strong>Graphiques non disponibles pour le moment.</strong></p>
+      </div>
+    </ng-template>
+  </div>
 </div>

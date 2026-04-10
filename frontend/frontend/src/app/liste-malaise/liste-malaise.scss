@@ -1,0 +1,99 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background: #eef5ef; /* fond plus visible */
+  font-family: Arial, sans-serif;
+}
+
+/* CONTENEUR */
+.container {
+  max-width: 1250px;
+  margin: 40px auto;
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  border: 1px solid #dce8dc;
+}
+
+/* PETITE BANDE VERTE */
+.container::before {
+  content: "";
+  display: block;
+  width: 100px;
+  height: 6px;
+  border-radius: 10px;
+  background: #2e7d32;
+  margin-bottom: 20px;
+}
+
+/* TITRE */
+h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1b4332; /* plus foncé */
+}
+
+/* TABLE */
+.table-wrapper {
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid #dbe8db;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* HEADER TABLE */
+th {
+  background: #2e7d32;
+  color: white;
+  padding: 14px;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+/* CELLULES */
+td {
+  padding: 14px;
+  border-bottom: 1px solid #e6eee6;
+  color: #1f2937; /* texte plus foncé */
+  font-weight: 500;
+}
+
+/* LIGNES ALTERNÉES (plus visibles) */
+tbody tr:nth-child(even) {
+  background-color: #f2f7f2;
+}
+
+/* HOVER PLUS CLAIR */
+tbody tr:hover {
+  background-color: #dff0e0;
+  transition: 0.2s;
+}
+
+/* METTRE EN VALEUR CERTAINES COLONNES */
+td:nth-child(2) { /* type */
+  font-weight: 600;
+}
+
+td:nth-child(8) { /* gravité */
+  font-weight: 700;
+}
+
+/* COULEURS GRAVITÉ */
+td:nth-child(8):contains("faible") {
+  color: #2e7d32;
+}
+
+td:nth-child(8):contains("modérée") {
+  color: #f9a825;
+}
+
+td:nth-child(8):contains("élevée") {
+  color: #d32f2f;
+}

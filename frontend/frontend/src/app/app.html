@@ -1,9 +1,29 @@
-<h1>Frontend configuré</h1>
+<nav class="navbar">
+  <div class="logo">
+    <img src="assets/logo2.png" alt="logo" />
+  </div>
 
 <nav>
   <a routerLink="/home">Accueil</a> |
   <a routerLink="/simulator">Simulation bracelets</a> |
   <a routerLink="/design-test">Dashboard</a> <!-- DESIGN-TEST — retirer cette ligne pour supprimer -->
+  <div class="nav-links">
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+      Accueil
+    </a>
+
+    <a routerLink="/liste-malaise" routerLinkActive="active">
+      Liste des malaises
+    </a>
+  </div>
+
+  <div class="nav-action">
+    <button routerLink="/formulaire-malaise">
+      Signaler un malaise
+    </button>
+  </div>
 </nav>
+
+
 
 <router-outlet></router-outlet>

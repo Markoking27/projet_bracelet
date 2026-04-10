@@ -1,16 +1,10 @@
-import { RouterModule, Routes } from '@angular/router';
 import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'home', pathMatch: 'full' },
-
   {
-    path: 'home',
-    loadComponent: () => import('./app').then(m => m.App)
-  },
-
-  {
-    path: 'simulator',
+    path: '',
     loadComponent: () =>
       import('./simulation-bracelet/simulation-bracelet')
         .then(m => m.SimulationBracelet)
@@ -23,6 +17,18 @@ export const routes: Routes = [
       import('./design-test/dashboard/dashboard')
         .then(m => m.DashboardComponent)
   },
+  {
+    path: 'liste-malaise',
+    loadComponent: () =>
+      import('./liste-malaise/liste-malaise')
+        .then(m => m.ListeMalaise)
+  },
+  {
+    path: 'formulaire-malaise',
+    loadComponent: () =>
+      import('./formulaire-malaise/formulaire-malaise')
+        .then(m => m.FormulaireMalaise)
+  }
 ];
 
 @NgModule({
