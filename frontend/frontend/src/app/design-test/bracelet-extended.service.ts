@@ -37,7 +37,7 @@ export interface DashboardData {
 
 @Injectable({ providedIn: 'root' })
 export class BraceletExtendedService {
-  private readonly url = 'http://localhost:3001/api/design-test/bracelets';
+  private readonly url = 'http://localhost:3000/api/design-test/bracelets';
 
   poll(): Observable<DashboardData> {
     return interval(2000).pipe(

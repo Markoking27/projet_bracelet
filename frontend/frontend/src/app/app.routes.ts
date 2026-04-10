@@ -17,6 +17,7 @@ export const routes: Routes = [
       import('./design-test/dashboard/dashboard')
         .then(m => m.DashboardComponent)
   },
+  ///////////////////////:fin DESIGN-TEST
   {
     path: 'liste-malaise',
     loadComponent: () =>

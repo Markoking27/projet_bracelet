@@ -286,7 +286,7 @@ class BraceletMonitor :
             elapsed = time.time() - self.start_time
             remaining = int(BASELINE_DURATION - elapsed)
             print(f"[calibration] {remaining}s restantes — BPM:{bpm} SpO2:{spo2} Temp:{temp} Accel:{accel:.2f}")
-            print("─" * 60)
+            print("-" * 60)
             return
  
         entry = self.history[-1]
@@ -304,7 +304,7 @@ class BraceletMonitor :
         print(f"  Contexte: {context}")
         if reasons:
             print(f"  Patterns: {' | '.join(reasons)}")
-        print("─" * 60)
+        print("-" * 60)
  
         # TODO : ajouter localisation 
         if score == 3:

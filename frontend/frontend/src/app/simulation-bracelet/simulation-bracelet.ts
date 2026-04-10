@@ -9,7 +9,7 @@ import {ChartConfiguration,ChartOptions} from 'chart.js';
   standalone: true,
   imports: [CommonModule, BaseChartDirective],
   templateUrl: './simulation-bracelet.html',
-  styleUrls: ['./simulation-bracelet.scss'],
+  styleUrl: './simulation-bracelet.scss',
 })
 export class SimulationBracelet implements OnInit, OnDestroy {
   bracelets: Bracelet[] = [];

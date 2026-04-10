@@ -39,6 +39,45 @@
 
 // scanline retiré (thème slate)
 
+// ── Tabs ───────────────────────────────────────────────────
+.vg-tabs {
+  flex-shrink: 0;
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.5rem 1.5rem 0;
+  background: var(--vg-surface);
+  border-bottom: 1px solid var(--vg-border);
+}
+
+.vg-tab {
+  padding: 0.5rem 1.25rem;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--vg-text-mid);
+  font-family: var(--vg-font-ui);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+
+  &:hover { color: var(--vg-text); }
+
+  &--active {
+    color: var(--vg-blue);
+    border-bottom-color: var(--vg-blue);
+  }
+}
+
+.vg-tab-content {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--vg-bg);
+  color: var(--vg-text);
+}
+
 // ── Header ─────────────────────────────────────────────────
 .vg-header {
   flex-shrink: 0;
