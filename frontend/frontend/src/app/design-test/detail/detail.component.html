@@ -21,6 +21,23 @@
     </button>
   </div>
 
+  <div class="dt-mode-controls">
+    <span class="dt-mode-label">Simuler:</span>
+    <div class="dt-mode-buttons">
+      @for (mode of modeButtons; track mode) {
+        <button
+          class="dt-mode-btn"
+          [class.active]="isActiveMode(mode)"
+          (click)="changeMode(mode)">
+          {{ mode }}
+        </button>
+      }
+    </div>
+    @if (modeStatus) {
+      <span class="dt-mode-status">{{ modeStatus }}</span>
+    }
+  </div>
+
   @if (bracelet().malaise) {
     <div class="dt-malaise-alert" role="alert">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">

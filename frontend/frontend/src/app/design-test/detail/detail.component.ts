@@ -1,16 +1,46 @@
 // DESIGN-TEST
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { BraceletExtended } from '../bracelet-extended.service';
+import { BraceletService } from '../../services/bracelet';
 
 @Component({
   selector: 'app-design-test-detail',
   standalone: true,
+  imports: [CommonModule],
   templateUrl: './detail.component.html',
   styleUrl: './detail.component.scss',
 })
-export class DetailComponent {
+export class DetailComponent implements OnInit {
   bracelet = input.required<BraceletExtended>();
   close = output<void>();
+  modeButtons = ['normal', 'effort', 'deshydratation', 'vagal', 'chaleur', 'alcool'];
+  modeStatus = '';
+  currentMode = '';
+
+  constructor(private braceletService: BraceletService) {}
+
+  ngOnInit(): void {
+    this.currentMode = (this.bracelet() as any).mode || 'normal';
+  }
+
+  changeMode(mode: string): void {
+    this.modeStatus = `Application du mode ${mode}...`;
+    this.braceletService.setBraceletMode(this.bracelet().id, mode).subscribe({
+      next: result => {
+        this.modeStatus = `Mode ${result.mode} appliqué.`;
+        this.currentMode = result.mode;
+      },
+      error: err => {
+        console.error('Erreur en appliquant le mode', err);
+        this.modeStatus = 'Impossible d\'appliquer le mode.';
+      }
+    });
+  }
+
+  isActiveMode(mode: string): boolean {
+    return this.currentMode === mode;
+  }
 
   levelLabel(l: number): string {
     return ['NORMAL', 'ATTENTION', 'ALERTE', 'URGENCE'][l] ?? '—';
