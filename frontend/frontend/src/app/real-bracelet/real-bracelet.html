@@ -1,0 +1,52 @@
+<div class="dashboard">
+  <h1>📡 Bracelet Réel</h1>
+
+  <div *ngIf="bracelet; else aucuneDonnee">
+    <div class="bracelet-card">
+      <div class="bracelet-header">
+        <span class="bracelet-id">{{ bracelet.bracelet_id }}</span>
+        <span class="time">{{ bracelet.time | date:'HH:mm:ss' }}</span>
+      </div>
+
+      <div class="metrics">
+        <div class="metric" [class.alerte]="!bracelet.finger">
+          <span class="label">👆 Doigt détecté</span>
+          <span class="value">{{ bracelet.finger ? 'Oui' : 'Non' }}</span>
+        </div>
+        <div class="metric" [class.alerte]="bracelet.bpm === 0">
+          <span class="label">❤️ BPM</span>
+          <span class="value">{{ bracelet.bpm }}</span>
+        </div>
+        <div class="metric">
+          <span class="label">📊 BPM Moyen</span>
+          <span class="value">{{ bracelet.bpm_avg }}</span>
+        </div>
+        <div class="metric">
+          <span class="label">🩸 SpO2</span>
+          <span class="value">{{ bracelet.spo2 | number:'1.1-2' }} %</span>
+        </div>
+        <div class="metric">
+          <span class="label">💧 Humidité</span>
+          <span class="value">{{ bracelet.humidity }} %</span>
+        </div>
+        <div class="metric">
+          <span class="label">📶 GTags détectés</span>
+          <span class="value">{{ bracelet.gtag_count }}</span>
+        </div>
+      </div>
+
+      <div class="gtags" *ngIf="bracelet.gtags.length > 0">
+        <h3>Balises détectées</h3>
+        <div class="gtag" *ngFor="let g of bracelet.gtags" [ngClass]="getProximityClass(g.proximity)">
+          <span class="address">{{ g.address }}</span>
+          <span class="proximity">{{ g.proximity }}</span>
+          <span class="rssi">{{ g.rssi }} dBm</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #aucuneDonnee>
+    <div class="waiting">⏳ En attente des données du bracelet...</div>
+  </ng-template>
+</div>

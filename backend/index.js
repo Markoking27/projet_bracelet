@@ -5,11 +5,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ── État bracelets (reçu depuis Python) ────────────────────
+// ── État bracelets simulation Python ──────────────────────
 let braceletsState = {};
+
+// ── État vrai bracelet ────────────────────────────────────
+let realBracelet = null;
 
 app.get('/', (req, res) => res.send('Backend OK'));
 
+// ── Routes simulation Python ──────────────────────────────
 app.post('/api/bracelet', (req, res) => {
   const { id, level, malaise } = req.body;
   braceletsState[id] = { id, level, malaise, time: new Date().toISOString() };
@@ -24,7 +28,33 @@ app.get('/api/bracelet', (req, res) => {
   res.json(enAlerte);
 });
 
-// ── Simulation design-test (anciennement port 3001) ────────
+// ── Routes vrai bracelet ──────────────────────────────────
+app.post('/api/bracelet/real', (req, res) => {
+  const body = req.body;
+  console.log('📡 Bracelet réel reçu :', body);
+
+  realBracelet = {
+    bracelet_id: body.bracelet_id,
+    bpm:         body.bpm,
+    bpm_avg:     body.bpm_avg,
+    spo2:        body.spo2,
+    ir:          body.ir,
+    humidity:    body.humidity,
+    finger:      body.finger,
+    gtag_count:  body.gtag_count,
+    gtag_found:  body.gtag_found,
+    gtags:       body.gtags || [],
+    time:        new Date().toISOString()
+  };
+
+  res.sendStatus(200);
+});
+
+app.get('/api/bracelet/real', (req, res) => {
+  res.json(realBracelet); // null si rien reçu encore
+});
+
+// ── Simulation design-test ────────────────────────────────
 const NUM_BRACELETS = 3;
 const HISTORY = 60;
 
@@ -118,5 +148,5 @@ app.get('/api/design-test/bracelets', (_, res) => {
   });
 });
 
-// ── Démarrage ──────────────────────────────────────────────
+// ── Démarrage ─────────────────────────────────────────────
 app.listen(3000, () => console.log('Serveur lancé sur http://localhost:3000'));

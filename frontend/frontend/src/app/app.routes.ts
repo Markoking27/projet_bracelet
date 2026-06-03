@@ -29,7 +29,13 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./formulaire-malaise/formulaire-malaise')
         .then(m => m.FormulaireMalaise)
-  }
+  },
+  {
+  path: 'real',
+  loadComponent: () =>
+    import('./real-bracelet/real-bracelet')
+      .then(m => m.RealBraceletComponent)
+}
 ];
 
 @NgModule({
