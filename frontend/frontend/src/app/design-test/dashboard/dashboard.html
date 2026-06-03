@@ -1,0 +1,132 @@
+<!-- DESIGN-TEST -->
+<div class="vg-shell">
+
+  <!-- ── Header ── -->
+  <header class="vg-header">
+    <div class="vg-header__brand">
+      <div class="vg-header__logo" aria-hidden="true">B4S</div>
+      <div class="vg-header__titles">
+        <span class="vg-header__name">BRACE4SAFE</span>
+        <span class="vg-header__sub">VIGILANCE GRID</span>
+      </div>
+    </div>
+    <div class="vg-header__meta">
+      <div class="vg-status" [class.vg-status--live]="connected()" role="status"
+           [attr.aria-label]="connected() ? 'Connecté' : 'Hors ligne'">
+        <span class="vg-status__dot" aria-hidden="true"></span>
+        <span class="vg-status__text">{{ connected() ? 'EN LIGNE' : 'HORS LIGNE' }}</span>
+      </div>
+      <time class="vg-timestamp" aria-label="Dernière mise à jour">{{ lastUpdate() }}</time>
+    </div>
+  </header>
+
+  <!-- ── KPI Bar ── -->
+  <div class="vg-kpi-bar" role="region" aria-label="Indicateurs globaux">
+    <div class="vg-kpi" aria-label="{{ stats().total }} bracelets au total">
+      <span class="vg-kpi__val">{{ stats().total }}</span>
+      <span class="vg-kpi__label">TOTAL</span>
+    </div>
+    <div class="vg-kpi vg-kpi--normal" aria-label="{{ stats().normal }} bracelets normaux">
+      <span class="vg-kpi__val">{{ stats().normal }}</span>
+      <span class="vg-kpi__label">NORMAL</span>
+    </div>
+    <div class="vg-kpi vg-kpi--attention" aria-label="{{ stats().attention }} en attention">
+      <span class="vg-kpi__val">{{ stats().attention }}</span>
+      <span class="vg-kpi__label">ATTENTION</span>
+    </div>
+    <div class="vg-kpi vg-kpi--alerte" aria-label="{{ stats().alerte }} en alerte">
+      <span class="vg-kpi__val">{{ stats().alerte }}</span>
+      <span class="vg-kpi__label">ALERTE</span>
+    </div>
+    <div class="vg-kpi vg-kpi--urgence" aria-label="{{ stats().urgence }} en urgence">
+      <span class="vg-kpi__val">{{ stats().urgence }}</span>
+      <span class="vg-kpi__label">URGENCE</span>
+    </div>
+  </div>
+
+  <!-- ── Main content ── -->
+  <div class="vg-content">
+
+    <!-- Map panel -->
+    <section class="vg-panel vg-panel--map" aria-labelledby="map-label">
+      <div class="vg-panel__label" id="map-label" aria-hidden="true">PLAN DE L'ÉVÉNEMENT</div>
+      <div class="vg-panel__body vg-panel__body--map">
+        <app-design-test-map
+          [bracelets]="bracelets()"
+          [selected]="selected()"
+          (braceletClick)="selectBracelet($event)"
+        />
+      </div>
+    </section>
+
+    <!-- Right column: list + detail -->
+    <div class="vg-right-col">
+
+      <!-- Bracelet list -->
+      <section class="vg-panel vg-panel--list" aria-labelledby="list-label"
+               [class.vg-panel--list-hidden]="selected()">
+        <div class="vg-panel__label" id="list-label" aria-hidden="true">BRACELETS ACTIFS</div>
+        <div class="vg-bracelet-list" role="list">
+
+          @for (b of bracelets(); track b.id) {
+            <button
+              class="vg-bracelet-card"
+              [class.vg-bracelet-card--attention]="b.level === 1"
+              [class.vg-bracelet-card--alerte]="b.level === 2"
+              [class.vg-bracelet-card--urgence]="b.level === 3"
+              [class.vg-bracelet-card--selected]="selected()?.id === b.id"
+              (click)="selectBracelet(b)"
+              role="listitem"
+              [attr.aria-label]="'Bracelet ' + b.id + ' — ' + levelLabel(b.level) + ', BPM ' + b.bpm + ', SpO₂ ' + b.spo2 + '%'"
+              [attr.aria-pressed]="selected()?.id === b.id"
+            >
+              <div class="vg-bc-header">
+                <span class="vg-bc-id">B{{ padId(b.id) }}</span>
+                <span class="vg-bc-level" [class]="'vg-bc-level--' + levelClass(b.level)">
+                  {{ levelLabel(b.level) }}
+                </span>
+              </div>
+              <div class="vg-bc-vitals">
+                <span class="vg-bc-vital">
+                  <span class="vg-bc-vl">BPM</span>
+                  <span class="vg-bc-vv vg-bc-vv--bpm">{{ b.bpm }}</span>
+                </span>
+                <span class="vg-bc-vital">
+                  <span class="vg-bc-vl">SpO₂</span>
+                  <span class="vg-bc-vv vg-bc-vv--spo2">{{ b.spo2 }}%</span>
+                </span>
+                <span class="vg-bc-vital">
+                  <span class="vg-bc-vl">°C</span>
+                  <span class="vg-bc-vv vg-bc-vv--temp">{{ b.temp }}</span>
+                </span>
+              </div>
+              @if (b.malaise) {
+                <div class="vg-bc-malaise" role="alert">{{ b.malaise }}</div>
+              }
+            </button>
+          }
+
+          @empty {
+            <div class="vg-empty" role="status">
+              <span class="vg-empty__dot"></span>
+              Connexion en cours…
+            </div>
+          }
+
+        </div>
+      </section>
+
+      <!-- Detail panel (slides in) -->
+      @if (selected()) {
+        <aside class="vg-detail-panel" aria-label="Détails du bracelet sélectionné">
+          <app-design-test-detail
+            [bracelet]="selected()!"
+            (close)="closeDetail()"
+          />
+        </aside>
+      }
+
+    </div>
+  </div>
+
+</div>

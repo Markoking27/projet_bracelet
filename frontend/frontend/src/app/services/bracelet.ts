@@ -9,13 +9,24 @@ export interface Bracelet {
   name?: string;
   level: number;
   malaise: string | null;
+  mode?: string;
+  bpm?: number;
 
   fc?: number;
   hrv?: number;
   temperature?: number;
+  accel?: number;
+  accelVariance?: number;
 
   x?: number;
   y?: number;
+
+  history?: {
+    bpm?: number[];
+    temperature?: number[];
+    spo2?: number[];
+    labels?: string[];
+  };
 
   fcHistory?: number[];
   hrvHistory?: number[];
@@ -27,11 +38,15 @@ export interface Bracelet {
   providedIn: 'root',
 })
 export class BraceletService {
-  private backendUrl = 'http://localhost:3000/api/bracelet'; 
+  private backendUrl = 'http://localhost:5000/api/bracelets'; 
 
   constructor(private http: HttpClient) { }
 
   getBracelets(): Observable<Bracelet[]> {
     return this.http.get<Bracelet[]>(this.backendUrl);
+  }
+
+  setBraceletMode(id: number, mode: string): Observable<any> {
+    return this.http.post(`${this.backendUrl}/${id}/mode`, { mode });
   }
 }

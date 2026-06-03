@@ -3,17 +3,17 @@ import math
 from collections import deque
 
 # Configuration 
-BASELINE_DURATION   = 30  
+BASELINE_DURATION   = 10  
 HISTORY_WINDOW      = 300   
 TREND_WINDOW        = 30    
-PERSISTENCE_WINDOW  = 45   
+PERSISTENCE_WINDOW  = 15   
  
 # Seuils relatifs 
-BPM_HIGH_RATIO      = 1.30  
-BPM_LOW_RATIO       = 0.75  
-SPO2_DROP           = 3.0   
-TEMP_HIGH_DELTA     = 1.5   
-TEMP_LOW_DELTA      = 1.5   
+BPM_HIGH_RATIO      = 1.20  
+BPM_LOW_RATIO       = 0.80  
+SPO2_DROP           = 2.0   
+TEMP_HIGH_DELTA     = 1.0   
+TEMP_LOW_DELTA      = 1.0   
  
 # Seuils accéléromètre
 ACCEL_IMMOBILE = 0.25  
@@ -286,7 +286,7 @@ class BraceletMonitor :
             elapsed = time.time() - self.start_time
             remaining = int(BASELINE_DURATION - elapsed)
             print(f"[calibration] {remaining}s restantes — BPM:{bpm} SpO2:{spo2} Temp:{temp} Accel:{accel:.2f}")
-            print("─" * 60)
+            print("-" * 60)
             return
  
         entry = self.history[-1]
@@ -304,7 +304,7 @@ class BraceletMonitor :
         print(f"  Contexte: {context}")
         if reasons:
             print(f"  Patterns: {' | '.join(reasons)}")
-        print("─" * 60)
+        print("-" * 60)
  
         # TODO : ajouter localisation 
         if score == 3:
