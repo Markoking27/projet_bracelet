@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { MalaiseService } from '../services/malaise.service';
+import { SupabaseService } from '../services/supabase';
 
 @Component({
   selector: 'app-formulaire-malaise',
@@ -18,7 +18,11 @@ export class FormulaireMalaise {
   heures = Array.from({ length: 24 }, (_, i) => i);
   minutes = Array.from({ length: 60 }, (_, i) => i);
 
-  constructor(private fb: FormBuilder, private malaiseService: MalaiseService) {
+  constructor(
+    private fb: FormBuilder,
+    private supabase: SupabaseService
+  ) {
+
     this.form = this.fb.group({
 
       // Typologie
@@ -53,10 +57,20 @@ export class FormulaireMalaise {
     });
   }
 
-  onSubmit() {
-  this.submitted = true;
+async ngOnInit() {
+  const { data, error } = await this.supabase
+    .getClient()
+    .from('malaises') 
+    .select('*');
 
-  if (this.form.valid) {
+  console.log('DATA =>', data);
+  console.log('ERROR =>', error);
+}
+
+  async onSubmit() {
+    this.submitted = true;
+
+    if (!this.form.valid) return;
 
     const today = new Date();
 
@@ -81,17 +95,27 @@ export class FormulaireMalaise {
         : this.form.value.typeEvent,
 
       gravite: this.form.value.gravite,
+
       intervention: this.form.value.intervention,
+
+      temps: this.form.value.tempsPrise,
+
+      alcool: this.form.value.alcool,
 
       heure: `${this.form.value.heure}:${this.form.value.minute}`
     };
 
-    this.malaiseService.addMalaise(newMalaise);
+    const { data, error } = await this.supabase
+      .getClient()
+      .from('malaises')
+      .insert([newMalaise]);
+
+    console.log('INSERT DATA =>', data);
+    console.log('INSERT ERROR =>', error);
 
     this.form.reset();
     this.submitted = false;
   }
-}
 
   isInvalid(control: string) {
     return !!(this.form.get(control)?.invalid && this.submitted);
