@@ -57,3 +57,8 @@ Si tout fonctionne bien vous devriez voir les alertes dans la console du node.js
 Accéder à la simulation :
 
 👉 http://127.0.0.1:5000
+
+▶️ Page de test 
+
+Pour tester les données avec les vrais bracelet utilisé la page (Pas de lien cliquable sur le site ): 
+👉 http://localhost:4200/real

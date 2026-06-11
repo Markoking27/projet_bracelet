@@ -34,6 +34,69 @@
     </div>
   </div>
 
+  <!-- Bracelet réel => A ENLEVER SI CA MARCHE DANS LES BRACELETS CLASSIQUE "CASE TEST"-->
+<div class="stat-card real-bracelet-card" *ngIf="realBracelet; else attenteReel">
+
+  <div class="real-header">
+    <span class="real-title">📡 Bracelet réel</span>
+    <span class="real-id">{{ realBracelet.bracelet_id }}</span>
+    <span class="real-time">{{ realBracelet.time | date:'HH:mm:ss' }}</span>
+  </div>
+
+  <div class="real-metrics">
+
+    <div class="real-metric" [class.alerte]="!realBracelet.finger">
+      <span class="metric-label">Doigt</span>
+      <span class="metric-value">{{ realBracelet.finger ? '✅' : '⚠️ Non' }}</span>
+    </div>
+
+    <div class="real-metric" [class.alerte]="realBracelet.bpm === 0">
+      <span class="metric-label">BPM</span>
+      <span class="metric-value">{{ realBracelet.bpm }}</span>
+    </div>
+
+    <div class="real-metric">
+      <span class="metric-label">BPM moy.</span>
+      <span class="metric-value">{{ realBracelet.bpm_avg }}</span>
+    </div>
+
+    <div class="real-metric">
+      <span class="metric-label">SpO2</span>
+      <span class="metric-value">{{ realBracelet.spo2 | number:'1.1-2' }} %</span>
+    </div>
+
+    <div class="real-metric">
+      <span class="metric-label">Humidité</span>
+      <span class="metric-value">{{ realBracelet.humidity }} %</span>
+    </div>
+
+    <div class="real-metric">
+      <span class="metric-label">GTags</span>
+      <span class="metric-value">{{ realBracelet.gtag_count }}</span>
+    </div>
+
+  </div>
+
+  <!-- Balises RSSI -->
+  <div class="real-gtags" *ngIf="realBracelet.gtags.length > 0">
+    <div
+      class="real-gtag"
+      *ngFor="let g of realBracelet.gtags"
+      [ngClass]="getProximityClass(g.proximity)">
+      <span>{{ g.address }}</span>
+      <span>{{ g.proximity }}</span>
+      <span>{{ g.rssi }} dBm</span>
+    </div>
+  </div>
+
+</div>
+
+<ng-template #attenteReel>
+  <div class="stat-card waiting-card">
+    <span>📡 En attente du bracelet réel...</span>
+  </div>
+</ng-template>
+
   <!-- Alertes + carte -->
   <div class="dashboard-layout">
     <!-- Colonne gauche -->
@@ -144,6 +207,7 @@
           <div class="summary-name">
             <span class="status-dot" [ngClass]="getLevelClass(b.level)"></span>
             {{ getBraceletDisplayName(b) }}
+            <span class="real-tag" *ngIf="b.isReal">réel</span>
           </div>
           <div class="summary-id">ID: BR-{{ b.id }}</div>
         </div>

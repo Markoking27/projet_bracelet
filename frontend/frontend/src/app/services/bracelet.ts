@@ -18,6 +18,8 @@ export interface Bracelet {
   accel?: number;
   accelVariance?: number;
 
+  isReal?: boolean;
+
   x?: number;
   y?: number;
 
