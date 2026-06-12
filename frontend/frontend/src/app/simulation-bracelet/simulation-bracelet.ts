@@ -186,6 +186,13 @@ private getRealBraceletY(): number | undefined {
     );
   }
 
+  addBracelet(): void {
+    this.braceletService.addBracelet().subscribe({
+      next: res => console.log('Bracelet ajouté', res),
+      error: err => console.error('Erreur ajout bracelet', err)
+    })
+  }
+
   // Graphiques
   get fcChartData(): ChartConfiguration<'line'>['data'] {
     const b = this.selectedBracelet;

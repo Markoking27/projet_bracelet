@@ -2,6 +2,12 @@
   <h1>Tableau de bord de supervision</h1>
   <p class="subtitle">Surveillance biométrique en temps réel</p>
 
+  <div class="toolbar">
+    <button class="btn-add" (click)="addBracelet()">
+      Ajouter un bracelet
+    </button>
+  </div>
+
   <!-- KPIs -->
   <div class="stats-grid">
     <div class="stat-card">
@@ -34,7 +40,7 @@
     </div>
   </div>
 
-  <!-- Bracelet réel => A ENLEVER SI CA MARCHE DANS LES BRACELETS CLASSIQUE "CASE TEST"-->
+<!-- Bracelet réel => A ENLEVER SI CA MARCHE DANS LES BRACELETS CLASSIQUE "CASE TEST"-->
 <div class="stat-card real-bracelet-card" *ngIf="realBracelet; else attenteReel">
 
   <div class="real-header">
