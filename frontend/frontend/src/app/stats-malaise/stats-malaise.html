@@ -17,30 +17,83 @@
     </div>
   </div>
 
+  <div class="section">
+  <h2>Répartition des données</h2>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Gravité</h3>
+      <canvas baseChart [data]="graviteChartData" [type]="doughnutType"></canvas>
+    </div>
+
+    <div class="card">
+      <h3>Sexe</h3>
+      <canvas baseChart [data]="sexeChartData" [type]="pieType"></canvas>
+    </div>
+
+    <div class="card">
+      <h3>Densité</h3>
+      <canvas baseChart [data]="densiteChartData" [type]="doughnutType"></canvas>
+    </div>
+
+    <div class="card">
+      <h3>Événements</h3>
+      <canvas baseChart [data]="eventChartData" [type]="pieType"></canvas>
+    </div>
+  </div>
+</div>
+
+
+<div class="section">
+  <h2>Analyse des facteurs</h2>
+
   <div class="grid">
 
-    <div class="card"><h3>Types</h3><canvas baseChart [data]="typeChartData" [type]="barType"></canvas></div>
+    <div class="card">
+      <h3>Types</h3>
+      <canvas baseChart [data]="typeChartData" [type]="barType"></canvas>
+    </div>
 
-    <div class="card"><h3>Gravité</h3><canvas baseChart [data]="graviteChartData" [type]="doughnutType"></canvas></div>
+    <div class="card">
+      <h3>Âge</h3>
+      <canvas baseChart [data]="ageChartData" [type]="barType"></canvas>
+    </div>
 
-    <div class="card"><h3>Sexe</h3><canvas baseChart [data]="sexeChartData" [type]="pieType"></canvas></div>
+    <div class="card">
+      <h3>Zone</h3>
+      <canvas baseChart [data]="zoneChartData" [type]="barType"></canvas>
+    </div>
 
-    <div class="card"><h3>Âge</h3><canvas baseChart [data]="ageChartData" [type]="barType"></canvas></div>
+    <div class="card">
+      <h3>Alcool</h3>
+      <canvas baseChart [data]="alcoolChartData" [type]="barType"></canvas>
+    </div>
 
-    <div class="card"><h3>Zone</h3><canvas baseChart [data]="zoneChartData" [type]="barType"></canvas></div>
-
-    <div class="card"><h3>Densité</h3><canvas baseChart [data]="densiteChartData" [type]="doughnutType"></canvas></div>
-
-    <div class="card"><h3>Événements</h3><canvas baseChart [data]="eventChartData" [type]="pieType"></canvas></div>
-
-    <div class="card"><h3>Alcool</h3><canvas baseChart [data]="alcoolChartData" [type]="barType"></canvas></div>
-
-    <div class="card"><h3>Temps</h3><canvas baseChart [data]="tempsChartData" [type]="barType"></canvas></div>
-
-    <div class="card large"><h3>Évolution</h3><canvas baseChart [data]="evolutionChartData" [type]="lineType"></canvas></div>
-
-    <div class="card large"><h3>Heures</h3><canvas baseChart [data]="heureChartData" [type]="lineType"></canvas></div>
+    <div class="card large">
+      <h3>Temps</h3>
+      <canvas baseChart [data]="tempsChartData" [type]="barType"></canvas>
+    </div>
 
   </div>
+</div>
+
+
+<div class="section">
+  <h2>Évolution temporelle</h2>
+
+  <div class="grid">
+
+    <div class="card">
+      <h3>Évolution</h3>
+      <canvas baseChart [data]="evolutionChartData" [type]="lineType"></canvas>
+    </div>
+
+    <div class="card">
+      <h3>Heures</h3>
+      <canvas baseChart [data]="heureChartData" [type]="lineType"></canvas>
+    </div>
+
+  </div>
+</div>
 
 </div>

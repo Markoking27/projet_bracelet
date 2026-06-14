@@ -56,7 +56,22 @@ export class StatsMalaiseComponent implements OnInit {
   chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: { legend: { display: true } }
+
+    plugins: {
+      legend: { display: true }
+    },
+
+    scales: {
+      x: {
+        type: 'category'
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          precision: 0
+        }
+      }
+    }
   };
 
   async loadData() {
@@ -101,87 +116,55 @@ export class StatsMalaiseComponent implements OnInit {
 
     for (const m of this.malaises) {
 
-      // ======================
       // TYPE
-      // ======================
       const validTypes = ['vagal','déshydratation','hypoglycémie','chaleur','alcool','chute'];
       let t = m.type?.trim();
       if (!t || !validTypes.includes(t)) t = 'autre';
       typeMap[t] = (typeMap[t] || 0) + 1;
 
-      // ======================
       // GRAVITE
-      // ======================
       const graviteKey = m.gravite as keyof typeof graviteMap;
-      if (graviteMap[graviteKey] !== undefined) {
-        graviteMap[graviteKey]++;
-      }
+      if (graviteMap[graviteKey] !== undefined) graviteMap[graviteKey]++;
 
-      // ======================
       // SEXE
-      // ======================
       const sexeKey = m.sexe as keyof typeof sexeMap;
-      if (sexeMap[sexeKey] !== undefined) {
-        sexeMap[sexeKey]++;
-      }
+      if (sexeMap[sexeKey] !== undefined) sexeMap[sexeKey]++;
 
-      // ======================
       // AGE
-      // ======================
       if (m.age) {
         ageMap[m.age] = (ageMap[m.age] || 0) + 1;
       }
 
-      // ======================
       // ZONE
-      // ======================
       const validZones = ['milieu', 'avant_scene', 'arriere'];
       let zoneKey = m.zone?.trim();
       if (!zoneKey || !validZones.includes(zoneKey)) zoneKey = 'autre';
       zoneMap[zoneKey] = (zoneMap[zoneKey] || 0) + 1;
 
-      // ======================
       // DENSITE
-      // ======================
       const densiteKey = m.densite as keyof typeof densiteMap;
-      if (densiteMap[densiteKey] !== undefined) {
-        densiteMap[densiteKey]++;
-      }
+      if (densiteMap[densiteKey] !== undefined) densiteMap[densiteKey]++;
 
-      // ======================
       // EVENT
-      // ======================
       const validEvents = ['sport', 'politique', 'musique'];
       let eventKey = m.event?.trim();
       if (!eventKey || !validEvents.includes(eventKey)) eventKey = 'autre';
       eventMap[eventKey] = (eventMap[eventKey] || 0) + 1;
 
-      // ======================
       // ALCOOL
-      // ======================
       const alcoolKey = m.alcool as keyof typeof alcoolMap;
-      if (alcoolMap[alcoolKey] !== undefined) {
-        alcoolMap[alcoolKey]++;
-      }
+      if (alcoolMap[alcoolKey] !== undefined) alcoolMap[alcoolKey]++;
 
-      // ======================
       // TEMPS
-      // ======================
       const tempsKey = m.temps as keyof typeof tempsMap;
-      if (tempsMap[tempsKey] !== undefined) {
-        tempsMap[tempsKey]++;
-      }
+      if (tempsMap[tempsKey] !== undefined) tempsMap[tempsKey]++;
 
-      // ======================
       // DATE
-      // ======================
       if (m.date) {
         dateMap[m.date] = (dateMap[m.date] || 0) + 1;
       }
 
-      // ======================
       // HEURE
-      // ======================
       if (m.heure) {
         const h = parseInt(m.heure.split(':')[0], 10);
         if (!isNaN(h) && h >= 0 && h < 24) {
@@ -239,15 +222,30 @@ export class StatsMalaiseComponent implements OnInit {
       datasets: [{ label: 'Temps', data: Object.values(tempsMap) }]
     };
 
+    // ======================
+    // EVOLUTION FIX (IMPORTANT)
+    // ======================
+
     const sortedDates = Object.keys(dateMap).sort();
+    const evolutionValues = sortedDates.map(d => dateMap[d]);
 
     this.evolutionChartData = {
-      labels: sortedDates,
-      datasets: [{
-        label: 'Malaises',
-        data: sortedDates.map(d => dateMap[d])
-      }]
+      labels: Array.from(
+        { length: evolutionValues.length },
+        (_, i) => `${i + 1}`
+      ),
+      datasets: [
+        {
+          label: 'Malaises',
+          data: evolutionValues,
+          tension: 0
+        }
+      ]
     };
+
+    // ======================
+    // HEURE
+    // ======================
 
     this.heureChartData = {
       labels: Array.from({ length: 24 }, (_, i) => `${i}h`),
