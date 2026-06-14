@@ -463,3 +463,100 @@ h1 {
     margin: 0 0 10px 0;
   }
 }
+
+.real-bracelet-card {
+  grid-column: span 2;   // prend 2 colonnes dans la stats-grid
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.real-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .real-title { font-weight: 600; font-size: 15px; }
+  .real-id    { font-size: 12px; opacity: 0.6; }
+  .real-time  { margin-left: auto; font-size: 12px; opacity: 0.5; }
+}
+
+.real-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.real-metric {
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  .metric-label { font-size: 11px; opacity: 0.55; }
+  .metric-value { font-size: 16px; font-weight: 500; }
+
+  &.alerte .metric-value { color: #ef4444; }
+}
+
+.real-gtags {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.real-gtag {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.04);
+
+  &.tres-proche { border-left: 3px solid #ef4444; }
+  &.proche      { border-left: 3px solid #f59e0b; }
+  &.loin        { border-left: 3px solid #6b7280; }
+}
+
+.waiting-card {
+  grid-column: span 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.5;
+  font-size: 14px;
+}
+
+.real-tag {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(45, 212, 160, 0.15);
+  color: #2dd4a0;
+  border: 1px solid rgba(45, 212, 160, 0.3);
+  margin-left: 6px;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.btn-add {
+  background: rgba(45, 212, 160, 0.15);
+  color: #2dd4a0;
+  border: 1px solid rgba(45, 212, 160, 0.3);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: rgba(45, 212, 160, 0.25);
+  }
+}

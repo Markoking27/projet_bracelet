@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { BraceletService, Bracelet } from '../services/bracelet';
 import { BaseChartDirective } from 'ng2-charts';
 import {ChartConfiguration,ChartOptions} from 'chart.js';
+import { RealBraceletService, RealBracelet } from '../services/real-bracelet';
 
 @Component({
   selector: 'app-simulation-bracelet',
@@ -14,9 +15,13 @@ import {ChartConfiguration,ChartOptions} from 'chart.js';
 export class SimulationBracelet implements OnInit, OnDestroy {
   bracelets: Bracelet[] = [];
   selectedBracelet: Bracelet | null = null;
+  realBracelet : RealBracelet | null = null;
   private interval: any;
 
-  constructor(private braceletService: BraceletService) {}
+  constructor(
+    private braceletService: BraceletService,
+    private realBraceletService : RealBraceletService,
+  ) {}
 
   ngOnInit(): void {
     this.fetchData();
@@ -31,6 +36,7 @@ fetchData(): void {
     this.braceletService.getBracelets().subscribe({
       next: data => {
         this.bracelets = data;
+        if(this.realBracelet) this.injectRealBracelet();
 
         if (this.selectedBracelet) {
           const updated = this.bracelets.find(b => b.id === this.selectedBracelet?.id);
@@ -39,7 +45,72 @@ fetchData(): void {
       },
       error: err => console.error('Erreur API', err)
     });
+    this.realBraceletService.getBracelet().subscribe({
+      next: data => {
+        this.realBracelet = data; 
+        if (data) this.injectRealBracelet();
+      },
+      error: err => console.error('Erreur Bracelet réel', err)
+    })
   }
+
+  private injectRealBracelet(): void {
+    if (!this.realBracelet) return;
+
+    const realAsSimulated: Bracelet = {
+      id: 0,                                      // id fixe pour le vrai bracelet
+      name: `📡 ${this.realBracelet.bracelet_id}`,
+      level: this.computeRealLevel(),
+      malaise: null,
+      bpm: this.realBracelet.bpm,
+      fc: this.realBracelet.bpm,
+      temperature: undefined,
+      x: this.getRealBraceletX(),                 // position depuis RSSI
+      y: this.getRealBraceletY(),
+    };
+
+    const idx = this.bracelets.findIndex(b => b.id === 0);
+    if (idx >= 0) {
+      this.bracelets[idx] = realAsSimulated;
+    } else {
+      this.bracelets = [realAsSimulated, ...this.bracelets];
+    }
+}
+
+private computeRealLevel(): number {
+  if (!this.realBracelet) return 0;
+  if (!this.realBracelet.finger) return 1;
+  if (this.realBracelet.bpm === 0) return 2;
+  if (this.realBracelet.bpm > 120 || this.realBracelet.spo2 < 94) return 2;
+  if (this.realBracelet.bpm > 100 || this.realBracelet.spo2 < 96) return 1;
+  return 0;
+}
+
+private getRealBraceletX(): number | undefined {
+  if (!this.realBracelet?.gtags?.length) return undefined;
+  // Utilise le RSSI de la balise la plus proche pour estimer la position
+  const closest = this.realBracelet.gtags
+    .sort((a, b) => b.rssi - a.rssi)[0];
+  // Adapte selon tes balises — ici exemple fixe par adresse
+  const positions: Record<string, { x: number; y: number }> = {
+    'AA:BB:CC:DD:EE:01': { x: 20, y: 30 },
+    'AA:BB:CC:DD:EE:02': { x: 60, y: 50 },
+    'AA:BB:CC:DD:EE:03': { x: 80, y: 70 },
+  };
+  return positions[closest.address]?.x;
+}
+
+private getRealBraceletY(): number | undefined {
+  if (!this.realBracelet?.gtags?.length) return undefined;
+  const closest = this.realBracelet.gtags
+    .sort((a, b) => b.rssi - a.rssi)[0];
+  const positions: Record<string, { x: number; y: number }> = {
+    'AA:BB:CC:DD:EE:01': { x: 20, y: 30 },
+    'AA:BB:CC:DD:EE:02': { x: 60, y: 50 },
+    'AA:BB:CC:DD:EE:03': { x: 80, y: 70 },
+  };
+  return positions[closest.address]?.y;
+}
 
   selectBracelet(bracelet: Bracelet): void {
     this.selectedBracelet = bracelet;
@@ -115,6 +186,13 @@ fetchData(): void {
     );
   }
 
+  addBracelet(): void {
+    this.braceletService.addBracelet().subscribe({
+      next: res => console.log('Bracelet ajouté', res),
+      error: err => console.error('Erreur ajout bracelet', err)
+    })
+  }
+
   // Graphiques
   get fcChartData(): ChartConfiguration<'line'>['data'] {
     const b = this.selectedBracelet;
@@ -133,6 +211,14 @@ fetchData(): void {
       ]
     };
   }
+
+  getProximityClass(proximity: string): string {
+  switch (proximity) {
+    case 'tres_proche': return 'tres-proche';
+    case 'proche':      return 'proche';
+    default:            return 'loin';
+  }
+}
 
   get hrvChartData(): ChartConfiguration<'line'>['data'] {
     const b = this.selectedBracelet;
