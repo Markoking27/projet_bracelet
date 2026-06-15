@@ -10,19 +10,17 @@ export const routes: Routes = [
         .then(m => m.SimulationBracelet)
   },
 
-  // DESIGN-TEST — retirer ce bloc pour supprimer le dashboard
+   {  path: 'statistiques',
+    loadComponent: () =>
+      import('./stats-malaise/stats-malaise')
+        .then(m => m.StatsMalaiseComponent)
+  },
+
   {
     path: 'design-test',
     loadComponent: () =>
       import('./design-test/dashboard/dashboard')
         .then(m => m.DashboardComponent)
-  },
-  ///////////////////////:fin DESIGN-TEST
-  {
-    path: 'liste-malaise',
-    loadComponent: () =>
-      import('./liste-malaise/liste-malaise')
-        .then(m => m.ListeMalaise)
   },
   {
     path: 'formulaire-malaise',
@@ -31,11 +29,11 @@ export const routes: Routes = [
         .then(m => m.FormulaireMalaise)
   },
   {
-  path: 'real',
-  loadComponent: () =>
-    import('./real-bracelet/real-bracelet')
-      .then(m => m.RealBraceletComponent)
-}
+    path: 'real',
+    loadComponent: () =>
+      import('./real-bracelet/real-bracelet')
+        .then(m => m.RealBraceletComponent)
+  }
 ];
 
 @NgModule({

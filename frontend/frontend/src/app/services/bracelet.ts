@@ -18,6 +18,8 @@ export interface Bracelet {
   accel?: number;
   accelVariance?: number;
 
+  isReal?: boolean;
+
   x?: number;
   y?: number;
 
@@ -48,5 +50,9 @@ export class BraceletService {
 
   setBraceletMode(id: number, mode: string): Observable<any> {
     return this.http.post(`${this.backendUrl}/${id}/mode`, { mode });
+  }
+
+  addBracelet(): Observable<any> {
+    return this.http.post(`http://localhost:5000/api/bracelets/add`, {});
   }
 }

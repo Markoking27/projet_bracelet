@@ -8,7 +8,7 @@
   box-shadow: 0 2px 10px rgba(0,0,0,0.04);
 }
 
-/* LOGO + TEXTE */
+/* LOGO */
 .logo {
   display: flex;
   align-items: center;
@@ -19,14 +19,7 @@
   height: 42px;
 }
 
-.logo-text {
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: #2e7d32; /* vert principal */
-  letter-spacing: 1px;
-}
-
-/* LIENS */
+/* LINKS */
 .nav-links {
   display: flex;
   gap: 28px;
@@ -38,20 +31,28 @@
   font-weight: 500;
   transition: 0.2s;
   position: relative;
+  outline: none;
 }
 
-/* Hover */
-.nav-links a:hover {
-  color: #2e7d32;
+/* VISITED (supprime bleu/purple navigateur) */
+.nav-links a:visited {
+  color: #4b5563;
 }
 
-/* Actif */
+/* ACTIVE (route Angular) */
 .nav-links a.active {
   color: #2e7d32;
   font-weight: 700;
 }
 
-/* Petit underline animé */
+/* HOVER / FOCUS / ACTIVE CLICK */
+.nav-links a:hover,
+.nav-links a:focus,
+.nav-links a:active {
+  color: #2e7d32 !important;
+}
+
+/* underline animé */
 .nav-links a::after {
   content: "";
   position: absolute;
