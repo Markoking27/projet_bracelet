@@ -14,6 +14,83 @@ import {ChartConfiguration,ChartOptions} from 'chart.js';
 export class SimulationBracelet implements OnInit, OnDestroy {
   bracelets: Bracelet[] = [];
   selectedBracelet: Bracelet | null = null;
+
+  balises: { id: string; x: number | null; y: number | null }[] = [
+  { id: 'B1', x: null, y: null },
+  { id: 'B2', x: null, y: null },
+  { id: 'B3', x: null, y: null },
+];
+
+placementBalises = false;
+draggedBalise: string | null = null;
+
+placerBalises(): void {
+  this.balises = [
+    { id: 'B1', x: null, y: null },
+    { id: 'B2', x: null, y: null },
+    { id: 'B3', x: null, y: null },
+  ];
+  this.placementBalises = true;
+}
+
+onMapClick(event: MouseEvent): void {
+  if (!this.placementBalises) return;
+
+  const map = event.currentTarget as HTMLElement;
+  const rect = map.getBoundingClientRect();
+
+  const x = ((event.clientX - rect.left) / rect.width) * 100;
+  const y = ((event.clientY - rect.top) / rect.height) * 100;
+
+  const next = this.balises.find(b => b.x === null || b.y === null);
+  if (!next) {
+    this.placementBalises = false;
+    return;
+  }
+
+  next.x = Math.round(x);
+  next.y = Math.round(y);
+
+  if (this.balises.every(b => b.x !== null && b.y !== null)) {
+    this.placementBalises = false;
+  }
+}
+
+startDragBalise(id: string, event: MouseEvent): void {
+  event.stopPropagation();
+  this.draggedBalise = id;
+}
+
+onMapMouseMove(event: MouseEvent): void {
+  if (!this.draggedBalise) return;
+
+  const map = event.currentTarget as HTMLElement;
+  const rect = map.getBoundingClientRect();
+
+  const x = ((event.clientX - rect.left) / rect.width) * 100;
+  const y = ((event.clientY - rect.top) / rect.height) * 100;
+
+  const balise = this.balises.find(b => b.id === this.draggedBalise);
+  if (balise) {
+    balise.x = Math.round(Math.max(0, Math.min(100, x)));
+    balise.y = Math.round(Math.max(0, Math.min(100, y)));
+  }
+}
+
+stopDragBalise(): void {
+  this.draggedBalise = null;
+}
+
+balisesPlacees() {
+  return this.balises.filter(b => b.x !== null && b.y !== null);
+}
+
+getBalisePosition(balise: { x: number | null; y: number | null }): { left: string; top: string } {
+  return {
+    left: `${balise.x}%`,
+    top: `${balise.y}%`
+  };
+}
   private interval: any;
 
   constructor(private braceletService: BraceletService) {}

@@ -99,26 +99,49 @@
           </div>
         </div>
 
-        <div class="geo-map">
-          <div
-            class="marker"
-            *ngFor="let b of braceletsAvecPosition()"
-            [ngStyle]="getMapPosition(b)"
-            (click)="selectBracelet(b)"
-            [title]="getBraceletDisplayName(b)"
-          >
-            <div class="pin-wrapper" [ngClass]="getLevelClass(b.level)" [class.selected]="isSelected(b)">
-              📍
-            </div>
+        <div class="map-actions">
+  <div>
+    <strong>Simulation des balises</strong>
+    <span>Clique sur la carte pour placer B1, B2 et B3. Les balises sont ensuite déplaçables.</span>
+  </div>
+
+  <button type="button" (click)="placerBalises()">
+    Placer 3 balises
+  </button>
+</div>
+
+<div
+  class="geo-map"
+  (click)="onMapClick($event)"
+  (mousemove)="onMapMouseMove($event)"
+  (mouseup)="stopDragBalise()"
+  (mouseleave)="stopDragBalise()"
+>
+  <div
+    class="balise"
+    *ngFor="let balise of balisesPlacees()"
+    [ngStyle]="getBalisePosition(balise)"
+    (mousedown)="startDragBalise(balise.id, $event)"
+  >
+    <div class="balise-icon">⌂</div>
+    <div class="balise-label">{{ balise.id }}</div>
+  </div>
+
+  <div
+    class="marker"
+    *ngFor="let b of braceletsAvecPosition()"
+    [ngStyle]="getMapPosition(b)"
+    (click)="selectBracelet(b); $event.stopPropagation()"
+    [title]="getBraceletDisplayName(b)"
+  >
+    <div class="pin-wrapper" [ngClass]="getLevelClass(b.level)" [class.selected]="isSelected(b)">
+      📍
+    </div>
             <div class="marker-dot" [ngClass]="getLevelClass(b.level)"></div>
 
             <div class="tooltip" *ngIf="isSelected(b)">
               {{ getBraceletDisplayName(b) }}
             </div>
-          </div>
-
-          <div class="empty-map-message" *ngIf="braceletsAvecPosition().length === 0">
-            Aucune position disponible pour le moment
           </div>
         </div>
 
