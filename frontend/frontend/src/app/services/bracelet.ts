@@ -19,6 +19,11 @@ export interface Bracelet {
   accelVariance?: number;
 
   isReal?: boolean;
+  spo2?: number;
+  humidity?: number;
+  gtag_count?: number;
+  bpm_avg?: number;
+  time?: string;
 
   x?: number;
   y?: number;

@@ -3,27 +3,108 @@ import { CommonModule } from '@angular/common';
 import { BraceletService, Bracelet } from '../services/bracelet';
 import { BaseChartDirective } from 'ng2-charts';
 import {ChartConfiguration,ChartOptions} from 'chart.js';
-import { RealBraceletService, RealBracelet } from '../services/real-bracelet';
+import { RealBraceletService, RealBracelet, GTag } from '../services/real-bracelet';
 
 @Component({
   selector: 'app-simulation-bracelet',
   standalone: true,
   imports: [CommonModule, BaseChartDirective],
   templateUrl: './simulation-bracelet.html',
-  styleUrl: './simulation-bracelet.scss',
+  styleUrls: ['./simulation-bracelet.scss'],
 })
 export class SimulationBracelet implements OnInit, OnDestroy {
   bracelets: Bracelet[] = [];
   selectedBracelet: Bracelet | null = null;
 
   balises: { id: string; x: number | null; y: number | null }[] = [
-  { id: 'B1', x: null, y: null },
-  { id: 'B2', x: null, y: null },
-  { id: 'B3', x: null, y: null },
-];
+    { id: 'B1', x: 20, y: 30 },
+    { id: 'B2', x: 60, y: 30 },
+    { id: 'B3', x: 40, y: 70 },
+  ];
 
 placementBalises = false;
 draggedBalise: string | null = null;
+
+  private readonly gtagAddressToAnchorId: Record<string, string> = {
+    '7C2F80949A1': 'B1',
+    '7C2F80949A82': 'B2',
+    '7C2F80A6E7': 'B3',
+    'B1': 'B1',
+    'B2': 'B2',
+    'B3': 'B3'
+  };
+
+  private normalizeAddress(address: string): string {
+    return address.toUpperCase().replace(/[^A-F0-9]/g, '');
+  }
+
+  private findAnchorIdByPrefix(address: string): string | undefined {
+    const normalizedAddress = this.normalizeAddress(address);
+    const matchKey = Object.keys(this.gtagAddressToAnchorId).find(key => {
+      const normalizedKey = this.normalizeAddress(key);
+      return normalizedAddress.startsWith(normalizedKey) || normalizedKey.startsWith(normalizedAddress);
+    });
+    return matchKey ? this.gtagAddressToAnchorId[matchKey] : undefined;
+  }
+
+  private getAnchorPositionFromGtag(gtag: GTag): { id: string; x: number; y: number } | undefined {
+    const anchorId = this.gtagAddressToAnchorId[gtag.address] || this.findAnchorIdByPrefix(gtag.address);
+    const anchor = this.balises.find(b => b.id === anchorId && b.x !== null && b.y !== null);
+    if (!anchor || anchor.x === null || anchor.y === null) {
+      return undefined;
+    }
+    return { id: anchor.id, x: anchor.x, y: anchor.y };
+  }
+
+  private rssiToDistance(rssi: number): number {
+    const txPower = -40;
+    const pathLoss = 2;
+    const meters = Math.pow(10, (txPower - rssi) / (10 * pathLoss));
+    return meters * 12;
+  }
+
+  private trilateratePoints(points: { x: number; y: number; r: number }[]): { x: number; y: number } | undefined {
+    if (points.length < 3) {
+      return undefined;
+    }
+
+    const [p1, p2, p3] = points;
+    const x1 = p1.x;
+    const y1 = p1.y;
+    const r1 = p1.r;
+    const x2 = p2.x;
+    const y2 = p2.y;
+    const r2 = p2.r;
+    const x3 = p3.x;
+    const y3 = p3.y;
+    const r3 = p3.r;
+
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const d = Math.sqrt(dx * dx + dy * dy);
+    if (d === 0) {
+      return undefined;
+    }
+
+    const ex = { x: dx / d, y: dy / d };
+    const i = ex.x * (x3 - x1) + ex.y * (y3 - y1);
+    const auxx = x3 - x1 - i * ex.x;
+    const auxy = y3 - y1 - i * ex.y;
+    const j = Math.sqrt(auxx * auxx + auxy * auxy);
+    if (j === 0) {
+      return undefined;
+    }
+
+    const x = (r1 * r1 - r2 * r2 + d * d) / (2 * d);
+    const y = (r1 * r1 - r3 * r3 + i * i + j * j) / (2 * j) - (i / j) * x;
+    const resultX = x1 + x * ex.x + y * (auxx / j);
+    const resultY = y1 + x * ex.y + y * (auxy / j);
+
+    return {
+      x: Math.round(Math.max(0, Math.min(100, resultX))),
+      y: Math.round(Math.max(0, Math.min(100, resultY)))
+    };
+  }
 
 placerBalises(): void {
   this.balises = [
@@ -43,23 +124,14 @@ onMapClick(event: MouseEvent): void {
   const x = ((event.clientX - rect.left) / rect.width) * 100;
   const y = ((event.clientY - rect.top) / rect.height) * 100;
 
-  const next = this.balises.find(b => b.x === null || b.y === null);
+  const next = this.balises.find(b => b.x === null || b.y === null) || this.balises[0];
   if (!next) {
     this.placementBalises = false;
     return;
   }
 
-  next.x = Math.round(x);
-  next.y = Math.round(y);
-
-  if (this.balises.every(b => b.x !== null && b.y !== null)) {
-    this.placementBalises = false;
-  }
-}
-
-startDragBalise(id: string, event: MouseEvent): void {
-  event.stopPropagation();
-  this.draggedBalise = id;
+  next.x = Math.round(Math.max(0, Math.min(100, x)));
+  next.y = Math.round(Math.max(0, Math.min(100, y)));
 }
 
 onMapMouseMove(event: MouseEvent): void {
@@ -76,6 +148,11 @@ onMapMouseMove(event: MouseEvent): void {
     balise.x = Math.round(Math.max(0, Math.min(100, x)));
     balise.y = Math.round(Math.max(0, Math.min(100, y)));
   }
+}
+
+startDragBalise(id: string, event: MouseEvent): void {
+  event.stopPropagation();
+  this.draggedBalise = id;
 }
 
 stopDragBalise(): void {
@@ -134,16 +211,23 @@ fetchData(): void {
   private injectRealBracelet(): void {
     if (!this.realBracelet) return;
 
+    const position = this.resolveRealBraceletPosition();
     const realAsSimulated: Bracelet = {
       id: 0,                                      // id fixe pour le vrai bracelet
       name: `📡 ${this.realBracelet.bracelet_id}`,
       level: this.computeRealLevel(),
       malaise: null,
       bpm: this.realBracelet.bpm,
+      bpm_avg: this.realBracelet.bpm_avg,
       fc: this.realBracelet.bpm,
+      spo2: this.realBracelet.spo2,
+      humidity: this.realBracelet.humidity,
+      gtag_count: this.realBracelet.gtag_count,
       temperature: undefined,
-      x: this.getRealBraceletX(),                 // position depuis RSSI
-      y: this.getRealBraceletY(),
+      time: this.realBracelet.time,
+      isReal: true,
+      x: position.x,
+      y: position.y,
     };
 
     const idx = this.bracelets.findIndex(b => b.id === 0);
@@ -163,30 +247,48 @@ private computeRealLevel(): number {
   return 0;
 }
 
-private getRealBraceletX(): number | undefined {
-  if (!this.realBracelet?.gtags?.length) return undefined;
-  // Utilise le RSSI de la balise la plus proche pour estimer la position
-  const closest = this.realBracelet.gtags
-    .sort((a, b) => b.rssi - a.rssi)[0];
-  // Adapte selon tes balises — ici exemple fixe par adresse
-  const positions: Record<string, { x: number; y: number }> = {
-    'AA:BB:CC:DD:EE:01': { x: 20, y: 30 },
-    'AA:BB:CC:DD:EE:02': { x: 60, y: 50 },
-    'AA:BB:CC:DD:EE:03': { x: 80, y: 70 },
-  };
-  return positions[closest.address]?.x;
+private resolveRealBraceletPosition(): { x?: number; y?: number } {
+  if (!this.realBracelet?.gtags?.length) return {};
+
+  const anchors = this.realBracelet.gtags
+    .map(gt => {
+      const anchor = this.getAnchorPositionFromGtag(gt);
+      return anchor ? { x: anchor.x, y: anchor.y, r: this.rssiToDistance(gt.rssi) } : undefined;
+    })
+    .filter((anchor): anchor is { x: number; y: number; r: number } => !!anchor);
+
+  if (anchors.length >= 3) {
+    const strongestThree = anchors
+      .slice()
+      .sort((a, b) => a.r - b.r)
+      .slice(0, 3);
+    const position = this.trilateratePoints(strongestThree);
+    if (position) {
+      return position;
+    }
+  }
+
+  if (anchors.length > 0) {
+    const totalWeight = anchors.reduce((sum, item) => sum + 1 / (item.r || 1), 0);
+    if (totalWeight > 0) {
+      const x = anchors.reduce((sum, item) => sum + item.x / (item.r || 1), 0) / totalWeight;
+      const y = anchors.reduce((sum, item) => sum + item.y / (item.r || 1), 0) / totalWeight;
+      return {
+        x: Math.round(Math.max(0, Math.min(100, x))),
+        y: Math.round(Math.max(0, Math.min(100, y)))
+      };
+    }
+  }
+
+  return {};
 }
 
-private getRealBraceletY(): number | undefined {
-  if (!this.realBracelet?.gtags?.length) return undefined;
-  const closest = this.realBracelet.gtags
-    .sort((a, b) => b.rssi - a.rssi)[0];
-  const positions: Record<string, { x: number; y: number }> = {
-    'AA:BB:CC:DD:EE:01': { x: 20, y: 30 },
-    'AA:BB:CC:DD:EE:02': { x: 60, y: 50 },
-    'AA:BB:CC:DD:EE:03': { x: 80, y: 70 },
-  };
-  return positions[closest.address]?.y;
+getRealBraceletPositionLabel(): string {
+  const position = this.resolveRealBraceletPosition();
+  if (position.x === undefined || position.y === undefined) {
+    return 'Inconnue';
+  }
+  return `x: ${position.x}, y: ${position.y}`;
 }
 
   selectBracelet(bracelet: Bracelet): void {
