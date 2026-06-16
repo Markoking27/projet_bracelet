@@ -226,22 +226,18 @@ export class StatsMalaiseComponent implements OnInit {
     // EVOLUTION FIX (IMPORTANT)
     // ======================
 
-    const sortedDates = Object.keys(dateMap).sort();
-    const evolutionValues = sortedDates.map(d => dateMap[d]);
+const sortedDates = Object.keys(dateMap).sort();
 
-    this.evolutionChartData = {
-      labels: Array.from(
-        { length: evolutionValues.length },
-        (_, i) => `${i + 1}`
-      ),
-      datasets: [
-        {
-          label: 'Malaises',
-          data: evolutionValues,
-          tension: 0
-        }
-      ]
-    };
+this.evolutionChartData = {
+  labels: sortedDates,
+  datasets: [
+    {
+      label: 'Malaises',
+      data: sortedDates.map(d => dateMap[d]),
+      tension: 0
+    }
+  ]
+};
 
     // ======================
     // HEURE
