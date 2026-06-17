@@ -9,7 +9,8 @@
 
       <div class="inline">
         <label *ngFor="let t of ['vagal','déshydratation','hypoglycémie','chaleur','alcool','chute','autre']">
-          <input type="radio" formControlName="typeMalaise" [value]="t"> {{ t }}
+          <input type="radio" formControlName="typeMalaise" [value]="t">
+          {{ t }}
         </label>
       </div>
 
@@ -31,6 +32,7 @@
         <label><input type="radio" formControlName="sexe" value="homme"> Homme</label>
         <label><input type="radio" formControlName="sexe" value="np"> Non précisé</label>
       </div>
+
       <div *ngIf="isInvalid('sexe')" class="error">Champ obligatoire</div>
 
       <p>Tranche d'âge</p>
@@ -41,6 +43,7 @@
         <label><input type="radio" formControlName="trancheAge" value="41-60"> 41-60</label>
         <label><input type="radio" formControlName="trancheAge" value="+60"> +60</label>
       </div>
+
       <div *ngIf="isInvalid('trancheAge')" class="error">Champ obligatoire</div>
     </div>
 
@@ -49,7 +52,7 @@
       <h3>Contexte spatial</h3>
 
       <div class="inline">
-        <label><input type="radio" formControlName="zone" value="avant"> Devant scène</label>
+        <label><input type="radio" formControlName="zone" value="avant_scene"> Devant scène</label>
         <label><input type="radio" formControlName="zone" value="milieu"> Milieu</label>
         <label><input type="radio" formControlName="zone" value="arriere"> Arrière</label>
         <label><input type="radio" formControlName="zone" value="annexe"> Zone annexe</label>
@@ -58,8 +61,7 @@
       <div *ngIf="isInvalid('zone')" class="error">Champ obligatoire</div>
 
       <div *ngIf="form.value.zone === 'annexe'">
-        <input type="text" formControlName="zoneDetail" placeholder="Précisez">
-        <div *ngIf="isInvalid('zoneDetail')" class="error">Champ obligatoire</div>
+        <input type="text" formControlName="zoneDetail" placeholder="Précisez la zone">
       </div>
 
       <p>Densité</p>
@@ -72,7 +74,7 @@
       <div *ngIf="isInvalid('densite')" class="error">Champ obligatoire</div>
     </div>
 
-    <!-- CONTEXTE EVENEMENT -->
+    <!-- CONTEXTE ÉVÉNEMENTIEL -->
     <div class="section">
       <h3>Contexte événementiel</h3>
 
@@ -88,14 +90,13 @@
 
       <div *ngIf="form.value.typeEvent === 'autre'">
         <input type="text" formControlName="autreEvent" placeholder="Précisez">
-        <div *ngIf="isInvalid('autreEvent')" class="error">Champ obligatoire</div>
       </div>
 
       <p>Sous-type (optionnel)</p>
       <input type="text" formControlName="sousType" placeholder="Ex: concert rock, foot...">
     </div>
 
-    <!-- GRAVITE -->
+    <!-- GRAVITÉ -->
     <div class="section">
       <h3>Gravité</h3>
 
@@ -114,7 +115,7 @@
 
       <p>Intervention</p>
       <div class="inline">
-        <label><input type="radio" formControlName="intervention" value="place"> Sur place</label>
+        <label><input type="radio" formControlName="intervention" value="sur_place"> Sur place</label>
         <label><input type="radio" formControlName="intervention" value="ambulance"> Ambulance</label>
       </div>
 
@@ -127,7 +128,7 @@
 
       <p>Alcoolémie</p>
       <div class="inline">
-        <label><input type="radio" formControlName="alcool" value="none"> Non mesuré</label>
+        <label><input type="radio" formControlName="alcool" value="non_mesure"> Non mesuré</label>
         <label><input type="radio" formControlName="alcool" value="faible"> Faible</label>
         <label><input type="radio" formControlName="alcool" value="modere"> Modéré</label>
         <label><input type="radio" formControlName="alcool" value="eleve"> Élevé</label>

@@ -1,4 +1,58 @@
 // DESIGN-TEST
+
+/* ── Mode Controls ── */
+.dt-mode-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  background: rgba(15, 23, 42, 0.3);
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.dt-mode-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+}
+
+.dt-mode-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dt-mode-btn {
+  border: 1px solid #475569;
+  background: rgba(15, 23, 42, 0.5);
+  color: #cbd5e1;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(71, 85, 105, 0.3);
+    border-color: #64748b;
+  }
+
+  &.active {
+    background: #3b82f6;
+    border-color: #3b82f6;
+    color: white;
+  }
+}
+
+.dt-mode-status {
+  font-size: 0.75rem;
+  color: #22d3ee;
+}
+
 .dt-detail {
   height: 100%;
   overflow-y: auto;

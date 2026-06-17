@@ -19,7 +19,10 @@ export class FormulaireMalaise {
   heures = Array.from({ length: 24 }, (_, i) => i);
   minutes = Array.from({ length: 60 }, (_, i) => i);
 
-  constructor(private fb: FormBuilder, private malaiseService: MalaiseService) {
+  constructor(
+    private fb: FormBuilder,
+    private malaiseService: MalaiseService
+  ) {
     this.form = this.fb.group({
       typeMalaise: ['', Validators.required],
       autreType: [''],
@@ -57,6 +60,8 @@ export class FormulaireMalaise {
       event: this.form.value.typeEvent === 'autre' ? this.form.value.autreEvent : this.form.value.typeEvent,
       gravite: this.form.value.gravite,
       intervention: this.form.value.intervention,
+      temps: this.form.value.tempsPrise,
+      alcool: this.form.value.alcool,
       heure: `${this.form.value.heure}:${String(this.form.value.minute).padStart(2, '0')}`,
     };
 

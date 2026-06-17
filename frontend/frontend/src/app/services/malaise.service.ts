@@ -12,6 +12,8 @@ export interface Malaise {
   event: string;
   gravite: string;
   intervention: string;
+  temps?: string;
+  alcool?: string;
   heure: string;
 }
 

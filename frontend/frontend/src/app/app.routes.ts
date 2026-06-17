@@ -39,6 +39,16 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./events/events').then(m => m.EventsComponent),
   },
+  {
+    path: 'statistiques',
+    canActivate: [authGuard],
+    loadComponent: () => import('./stats-malaise/stats-malaise').then(m => m.StatsMalaiseComponent),
+  },
+  {
+    path: 'real',
+    canActivate: [authGuard],
+    loadComponent: () => import('./real-bracelet/real-bracelet').then(m => m.RealBraceletComponent),
+  },
 ];
 
 @NgModule({

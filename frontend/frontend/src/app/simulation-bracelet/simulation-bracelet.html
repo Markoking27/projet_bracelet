@@ -2,6 +2,12 @@
   <h1>Tableau de bord de supervision</h1>
   <p class="subtitle">Surveillance biométrique en temps réel</p>
 
+  <div class="toolbar">
+    <button class="btn-add" (click)="addBracelet()">
+      Ajouter un bracelet
+    </button>
+  </div>
+
   <!-- KPIs -->
   <div class="stats-grid">
     <div class="stat-card">
@@ -33,6 +39,74 @@
       <div class="stat-value">{{ getActiveCount() }}</div>
     </div>
   </div>
+
+<!-- Bracelet réel => A ENLEVER SI CA MARCHE DANS LES BRACELETS CLASSIQUE "CASE TEST"-->
+<div class="stat-card real-bracelet-card" *ngIf="realBracelet; else attenteReel">
+
+  <div class="real-header">
+    <span class="real-title">📡 Bracelet réel</span>
+    <span class="real-id">{{ realBracelet.bracelet_id }}</span>
+    <span class="real-time">{{ realBracelet.time | date:'HH:mm:ss' }}</span>
+  </div>
+
+  <div class="real-metrics">
+
+    <div class="real-metric" [class.alerte]="!realBracelet.finger">
+      <span class="metric-label">Doigt</span>
+      <span class="metric-value">{{ realBracelet.finger ? '✅' : '⚠️ Non' }}</span>
+    </div>
+
+    <div class="real-metric" [class.alerte]="realBracelet.bpm === 0">
+      <span class="metric-label">BPM</span>
+      <span class="metric-value">{{ realBracelet.bpm }}</span>
+    </div>
+
+    <div class="real-metric">
+      <span class="metric-label">BPM moy.</span>
+      <span class="metric-value">{{ realBracelet.bpm_avg }}</span>
+    </div>
+
+    <div class="real-metric">
+      <span class="metric-label">SpO2</span>
+      <span class="metric-value">{{ realBracelet.spo2 | number:'1.1-2' }} %</span>
+    </div>
+
+    <div class="real-metric">
+      <span class="metric-label">Humidité</span>
+      <span class="metric-value">{{ realBracelet.humidity }} %</span>
+    </div>
+
+    <div class="real-metric">
+      <span class="metric-label">GTags</span>
+      <span class="metric-value">{{ realBracelet.gtag_count }}</span>
+    </div>
+
+    <div class="real-metric">
+      <span class="metric-label">Position estimée</span>
+      <span class="metric-value">{{ getRealBraceletPositionLabel() }}</span>
+    </div>
+
+  </div>
+
+  <!-- Balises RSSI -->
+  <div class="real-gtags" *ngIf="realBracelet.gtags.length > 0">
+    <div
+      class="real-gtag"
+      *ngFor="let g of realBracelet.gtags"
+      [ngClass]="getProximityClass(g.proximity)">
+      <span>{{ g.address }}</span>
+      <span>{{ g.proximity }}</span>
+      <span>{{ g.rssi }} dBm</span>
+    </div>
+  </div>
+
+</div>
+
+<ng-template #attenteReel>
+  <div class="stat-card waiting-card">
+    <span>📡 En attente du bracelet réel...</span>
+  </div>
+</ng-template>
 
   <!-- Alertes + carte -->
   <div class="dashboard-layout">
@@ -99,27 +173,51 @@
           </div>
         </div>
 
-        <div class="geo-map">
-          <div
-            class="marker"
-            *ngFor="let b of braceletsAvecPosition()"
-            [ngStyle]="getMapPosition(b)"
-            (click)="selectBracelet(b)"
-            [title]="getBraceletDisplayName(b)"
-          >
-            <div class="pin-wrapper" [ngClass]="getLevelClass(b.level)" [class.selected]="isSelected(b)">
-              📍
-            </div>
-            <div class="marker-dot" [ngClass]="getLevelClass(b.level)"></div>
+        <div class="map-actions">
+  <div>
+    <strong>Simulation des balises</strong>
+    <span>Clique sur la carte pour placer B1, B2 et B3. Les balises sont ensuite déplaçables.</span>
+  </div>
 
-            <div class="tooltip" *ngIf="isSelected(b)">
-              {{ getBraceletDisplayName(b) }}
-            </div>
-          </div>
+  <button type="button" (click)="placerBalises()">
+    Placer 3 balises
+  </button>
+</div>
 
-          <div class="empty-map-message" *ngIf="braceletsAvecPosition().length === 0">
-            Aucune position disponible pour le moment
-          </div>
+<div
+  class="geo-map"
+  (click)="onMapClick($event)"
+  (mousemove)="onMapMouseMove($event)"
+  (mouseup)="stopDragBalise()"
+  (mouseleave)="stopDragBalise()"
+>
+  <div
+    class="balise"
+    *ngFor="let balise of balisesPlacees()"
+    [ngStyle]="getBalisePosition(balise)"
+    (mousedown)="startDragBalise(balise.id, $event)"
+  >
+    <div class="balise-icon">⌂</div>
+    <div class="balise-label">{{ balise.id }}</div>
+  </div>
+
+  <div
+    class="marker"
+    *ngFor="let b of braceletsAvecPosition()"
+    [ngStyle]="getMapPosition(b)"
+    [ngClass]="{ 'real-marker': b.isReal }"
+    (click)="selectBracelet(b); $event.stopPropagation()"
+    [title]="getBraceletDisplayName(b)"
+  >
+    <div class="pin-wrapper" [ngClass]="getLevelClass(b.level)" [class.selected]="isSelected(b)">
+      {{ b.isReal ? '🎯' : '📍' }}
+    </div>
+    <div class="marker-dot" [ngClass]="getLevelClass(b.level)"></div>
+
+    <div class="tooltip" *ngIf="isSelected(b)">
+      {{ getBraceletDisplayName(b) }}
+    </div>
+  </div>
         </div>
 
         <div class="map-footer">
@@ -144,24 +242,29 @@
           <div class="summary-name">
             <span class="status-dot" [ngClass]="getLevelClass(b.level)"></span>
             {{ getBraceletDisplayName(b) }}
+            <span class="real-tag" *ngIf="b.isReal">réel</span>
           </div>
           <div class="summary-id">ID: BR-{{ b.id }}</div>
         </div>
 
         <div class="summary-grid">
           <div class="summary-metric">
-            <div class="metric-label">FC</div>
-            <div class="metric-value">{{ b.fc ?? '--' }} bpm</div>
+            <div class="metric-label">{{ b.isReal ? 'BPM' : 'FC' }}</div>
+            <div class="metric-value">{{ b.isReal ? (b.bpm ?? '--') : (b.fc ?? '--') }} bpm</div>
           </div>
 
           <div class="summary-metric">
-            <div class="metric-label">HRV</div>
-            <div class="metric-value">{{ b.hrv ?? '--' }} ms</div>
+            <div class="metric-label">{{ b.isReal ? 'SpO2' : 'HRV' }}</div>
+            <div class="metric-value">
+              {{ b.isReal ? (b.spo2 !== undefined ? (b.spo2 + ' %') : '--') : (b.hrv !== undefined ? (b.hrv + ' ms') : '--') }}
+            </div>
           </div>
 
           <div class="summary-metric">
-            <div class="metric-label">Temp</div>
-            <div class="metric-value">{{ b.temperature ?? '--' }} °C</div>
+            <div class="metric-label">{{ b.isReal ? 'Humidité' : 'Temp' }}</div>
+            <div class="metric-value">
+              {{ b.isReal ? (b.humidity !== undefined ? (b.humidity + ' %') : '--') : (b.temperature !== undefined ? (b.temperature + ' °C') : '--') }}
+            </div>
           </div>
 
           <div class="summary-metric">
@@ -193,16 +296,6 @@
       </div>
 
       <div class="detail-box">
-        <div class="detail-label">HRV</div>
-        <div class="detail-value">{{ b.hrv ?? '--' }} ms</div>
-      </div>
-
-      <div class="detail-box">
-        <div class="detail-label">Température</div>
-        <div class="detail-value">{{ b.temperature ?? '--' }} °C</div>
-      </div>
-
-      <div class="detail-box">
         <div class="detail-label">Malaise</div>
         <div class="detail-value">{{ b.malaise || 'Aucun' }}</div>
       </div>
@@ -221,50 +314,17 @@
           <ng-template #noPositionDetail>--</ng-template>
         </div>
       </div>
-    </div>
 
-    <div class="charts-section" *ngIf="hasChartData(b); else noCharts">
-      <div class="chart-block">
-        <h3>Fréquence cardiaque (bpm)</h3>
-        <div class="chart-wrapper">
-          <canvas
-            baseChart
-            [data]="fcChartData"
-            [options]="lineChartOptions"
-            [type]="lineChartType">
-          </canvas>
-        </div>
+      <div class="detail-box" *ngIf="b.spo2 !== undefined">
+        <div class="detail-label">SpO2</div>
+        <div class="detail-value">{{ b.spo2 }} %</div>
       </div>
 
-      <div class="chart-block">
-        <h3>Variabilité cardiaque HRV (ms)</h3>
-        <div class="chart-wrapper">
-          <canvas
-            baseChart
-            [data]="hrvChartData"
-            [options]="lineChartOptions"
-            [type]="lineChartType">
-          </canvas>
-        </div>
+      <div class="detail-box" *ngIf="b.humidity !== undefined">
+        <div class="detail-label">Humidité</div>
+        <div class="detail-value">{{ b.humidity }} %</div>
       </div>
 
-      <div class="chart-block">
-        <h3>Température cutanée (°C)</h3>
-        <div class="chart-wrapper">
-          <canvas
-            baseChart
-            [data]="tempChartData"
-            [options]="lineChartOptions"
-            [type]="lineChartType">
-          </canvas>
-        </div>
-      </div>
-    </div>
 
-    <ng-template #noCharts>
-      <div class="charts-placeholder">
-        <p><strong>Graphiques non disponibles pour le moment.</strong></p>
-      </div>
-    </ng-template>
   </div>
 </div>

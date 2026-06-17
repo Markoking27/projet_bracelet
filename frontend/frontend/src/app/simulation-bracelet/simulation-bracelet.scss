@@ -222,6 +222,49 @@ h1 {
   background-color: #efefef;
 }
 
+.map-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+  padding: 14px 18px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+}
+
+.balise {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: grab;
+}
+
+.balise-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #2563eb;
+  color: white;
+  font-weight: 700;
+  box-shadow: 0 2px 12px rgba(37, 99, 235, 0.25);
+}
+
+.balise-label {
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: #0f172a;
+  background: rgba(255,255,255,0.9);
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid #cbd5e1;
+}
+
 .marker {
   position: absolute;
   transform: translate(-50%, -50%);
@@ -271,6 +314,20 @@ h1 {
   &.danger {
     background: #ef4444;
   }
+}
+
+.marker.real-marker .pin-wrapper {
+  background: linear-gradient(135deg, #2563eb, #9333ea);
+  color: white;
+  box-shadow: 0 3px 16px rgba(56, 189, 248, 0.35);
+}
+
+.marker.real-marker .marker-dot {
+  border-color: #2563eb;
+}
+
+.marker.real-marker .tooltip {
+  background: #1e3a8a;
 }
 
 .tooltip {

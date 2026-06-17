@@ -60,7 +60,7 @@ app.get('/api/auth/me', requireAuth, (req, res) => {
 });
 
 // ── Événements ────────────────────────────────────────────────
-const events = {}; // { [id]: { id, userId, nom, lieu, type, date, nbBracelets, statut, malaises[], createdAt } }
+const events = {};
 
 app.post('/api/events', requireAuth, (req, res) => {
   const { nom, lieu, type, date, nbBracelets } = req.body ?? {};
@@ -114,11 +114,15 @@ app.get('/api/malaises', requireAuth, (req, res) => {
   res.json(all);
 });
 
-// ── État bracelets (reçu depuis Python) ──────────────────────
+// ── État bracelets simulation Python ──────────────────────────
 let braceletsState = {};
+
+// ── État vrai bracelet (envoyé par le hardware) ───────────────
+let realBracelet = null;
 
 app.get('/', (req, res) => res.send('Backend OK'));
 
+// ── Routes simulation Python ──────────────────────────────────
 app.post('/api/bracelet', (req, res) => {
   const { id, level, malaise } = req.body;
   braceletsState[id] = { id, level, malaise, time: new Date().toISOString() };
@@ -131,6 +135,30 @@ app.get('/api/bracelet', (req, res) => {
     .filter(b => b.level > 0)
     .sort((a, b) => a.id - b.id);
   res.json(enAlerte);
+});
+
+// ── Routes vrai bracelet ──────────────────────────────────────
+app.post('/api/bracelet/real', (req, res) => {
+  const body = req.body;
+  console.log('📡 Bracelet réel reçu :', body);
+  realBracelet = {
+    bracelet_id: body.bracelet_id,
+    bpm:         body.bpm,
+    bpm_avg:     body.bpm_avg,
+    spo2:        body.spo2,
+    ir:          body.ir,
+    humidity:    body.humidity,
+    finger:      body.finger,
+    gtag_count:  body.gtag_count,
+    gtag_found:  body.gtag_found,
+    gtags:       body.gtags || [],
+    time:        new Date().toISOString()
+  };
+  res.sendStatus(200);
+});
+
+app.get('/api/bracelet/real', (req, res) => {
+  res.json(realBracelet);
 });
 
 // ── Simulation design-test ────────────────────────────────────
