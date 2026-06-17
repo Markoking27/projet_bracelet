@@ -1,15 +1,30 @@
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Component, signal } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterModule } from '@angular/router';
+import { RouterOutlet, RouterLink, RouterModule, Router } from '@angular/router';
+import { AuthService } from './services/auth.service';
+import { EventService } from './services/event.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [RouterOutlet, RouterLink, CommonModule, RouterModule],
   templateUrl: './app.html',
-  styleUrl: './app.scss'
+  styleUrl: './app.scss',
 })
-export class App {
-  protected readonly title = signal('frontend');
-}
+export class App implements OnInit {
+  auth = inject(AuthService);
+  eventService = inject(EventService);
+  private router = inject(Router);
 
+  async ngOnInit() {
+    if (this.auth.isAuthenticated()) {
+      await this.eventService.loadEvents();
+    }
+  }
+
+  async logout() {
+    await this.auth.logout();
+    this.eventService.clearLocalState();
+    this.router.navigate(['/login']);
+  }
+}

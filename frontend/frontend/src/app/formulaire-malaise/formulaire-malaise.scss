@@ -158,6 +158,17 @@ input[type="radio"] {
   box-shadow: none;
 }
 
+.success-msg {
+  margin-top: 12px;
+  background: #dcfce7;
+  border: 1px solid #86efac;
+  color: #15803d;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
 /* Optionnel : rendre certains sous-groupes plus propres */
 .subgroup {
   margin-top: 14px;

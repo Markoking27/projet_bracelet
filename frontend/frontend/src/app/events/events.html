@@ -1,0 +1,110 @@
+<div class="events-page">
+
+  <div class="events-header">
+    <div>
+      <h2>Mes événements</h2>
+      <p class="subtitle">Créez un événement et lancez-le pour commencer la surveillance.</p>
+    </div>
+    <button class="btn-create" (click)="showForm.set(!showForm())">
+      {{ showForm() ? 'Annuler' : '+ Nouvel événement' }}
+    </button>
+  </div>
+
+  @if (showForm()) {
+    <div class="create-form">
+      <h3>Créer un événement</h3>
+
+      @if (error()) {
+        <div class="form-error">{{ error() }}</div>
+      }
+
+      <div class="form-grid">
+        <div class="field">
+          <label>Nom de l'événement *</label>
+          <input type="text" [(ngModel)]="nom" placeholder="Festival de la musique 2026" />
+        </div>
+        <div class="field">
+          <label>Lieu *</label>
+          <input type="text" [(ngModel)]="lieu" placeholder="Stade de France, Paris" />
+        </div>
+        <div class="field">
+          <label>Type d'événement *</label>
+          <select [(ngModel)]="type">
+            @for (opt of typeOptions; track opt.value) {
+              <option [value]="opt.value">{{ opt.label }}</option>
+            }
+          </select>
+        </div>
+        <div class="field">
+          <label>Date *</label>
+          <input type="date" [(ngModel)]="date" />
+        </div>
+        <div class="field">
+          <label>Nombre de bracelets prévus</label>
+          <input type="number" [(ngModel)]="nbBracelets" min="0" placeholder="0" />
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-submit" (click)="createEvent()" [disabled]="loading()">
+          {{ loading() ? 'Création…' : 'Créer l\'événement' }}
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (events().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">📋</div>
+      <p>Aucun événement pour l'instant.</p>
+      <p class="empty-sub">Créez votre premier événement pour commencer la surveillance des bracelets.</p>
+    </div>
+  } @else {
+    <div class="events-list">
+      @for (event of events(); track event.id) {
+        <div class="event-card" [class.active]="event.statut === 'actif'">
+          <div class="event-card-header">
+            <div class="event-info">
+              <span class="event-name">{{ event.nom }}</span>
+              <span class="event-meta">{{ event.lieu }} · {{ typeLabel(event.type) }} · {{ event.date }}</span>
+            </div>
+            <span class="statut-badge" [class]="'statut-' + event.statut">
+              {{ statutLabel(event.statut) }}
+            </span>
+          </div>
+
+          <div class="event-stats">
+            <div class="stat">
+              <span class="stat-val">{{ event.nbBracelets || '–' }}</span>
+              <span class="stat-label">Bracelets prévus</span>
+            </div>
+            <div class="stat">
+              <span class="stat-val">{{ event.totalMalaises }}</span>
+              <span class="stat-label">Malaises enregistrés</span>
+            </div>
+          </div>
+
+          <div class="event-actions">
+            @if (event.statut === 'planifie') {
+              <button class="btn-launch" (click)="activate(event.id)">
+                Lancer la surveillance
+              </button>
+            }
+            @if (event.statut === 'actif') {
+              <div class="active-indicator">
+                <span class="pulse-dot"></span> Surveillance en cours
+              </div>
+              <button class="btn-close" (click)="closeEvent(event.id)">
+                Terminer l'événement
+              </button>
+            }
+            @if (event.statut === 'termine') {
+              <span class="termine-label">Événement terminé</span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+</div>

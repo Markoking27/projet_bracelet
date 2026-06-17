@@ -159,7 +159,13 @@
       </div>
     </div>
 
-    <button class="btn" type="submit">Valider</button>
+    <button class="btn" type="submit" [disabled]="saving">
+      {{ saving ? 'Enregistrement…' : 'Valider' }}
+    </button>
+
+    @if (saved) {
+      <div class="success-msg">Malaise enregistré avec succès.</div>
+    }
 
   </form>
 </div>

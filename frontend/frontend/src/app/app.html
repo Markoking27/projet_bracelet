@@ -1,27 +1,46 @@
-<nav class="navbar">
-  <div class="logo">
-    <img src="assets/logo2.png" alt="logo" />
-  </div>
+@if (auth.isAuthenticated()) {
+  <nav class="navbar">
+    <div class="logo">
+      <img src="assets/logo2.png" alt="logo" />
+    </div>
 
-  <div class="nav-links">
-    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-      Accueil
-    </a>
+    <div class="nav-links">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        Accueil
+      </a>
+      <a routerLink="/design-test" routerLinkActive="active">
+        Simulation bracelets
+      </a>
+      <a routerLink="/liste-malaise" routerLinkActive="active">
+        Liste des malaises
+      </a>
+      <a routerLink="/events" routerLinkActive="active">
+        Mes événements
+      </a>
+    </div>
 
-    <a routerLink="/design-test" routerLinkActive="active">
-      Simulation bracelets
-    </a>
+    <div class="nav-right">
+      @if (eventService.activeEvent(); as event) {
+        <div class="active-event">
+          <span class="event-dot"></span>
+          {{ event.nom }}
+        </div>
+      } @else {
+        <a routerLink="/events" class="no-event-link">
+          Aucun événement actif
+        </a>
+      }
 
-    <a routerLink="/liste-malaise" routerLinkActive="active">
-      Liste des malaises
-    </a>
-  </div>
+      <button class="btn-signal" routerLink="/formulaire-malaise">
+        Signaler un malaise
+      </button>
 
-  <div class="nav-action">
-    <button routerLink="/formulaire-malaise">
-      Signaler un malaise
-    </button>
-  </div>
-</nav>
+      <div class="user-zone">
+        <span class="user-name">{{ auth.user()?.nom }}</span>
+        <button class="btn-logout" (click)="logout()">Déconnexion</button>
+      </div>
+    </div>
+  </nav>
+}
 
 <router-outlet></router-outlet>

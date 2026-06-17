@@ -1,0 +1,36 @@
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <img src="assets/logo2.png" alt="Brace4Safe" />
+      <span class="brand">BRACE4SAFE</span>
+    </div>
+
+    <h2>Connexion</h2>
+
+    <div class="demo-hint">
+      Compte démo : <strong>demo&#64;brace4safe.fr</strong> / <strong>demo123</strong>
+    </div>
+
+    @if (error) {
+      <div class="auth-error">{{ error }}</div>
+    }
+
+    <form (ngSubmit)="submit()" #f="ngForm">
+      <div class="field">
+        <label>Email</label>
+        <input type="text" [(ngModel)]="email" name="email" placeholder="vous@example.com" />
+      </div>
+      <div class="field">
+        <label>Mot de passe</label>
+        <input type="password" [(ngModel)]="password" name="password" placeholder="••••••••" />
+      </div>
+      <button type="submit" [disabled]="loading">
+        {{ loading ? 'Connexion…' : 'Se connecter' }}
+      </button>
+    </form>
+
+    <p class="auth-switch">
+      Pas encore de compte ? <a routerLink="/register">Créer un compte</a>
+    </p>
+  </div>
+</div>

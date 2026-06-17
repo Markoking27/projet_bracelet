@@ -5,7 +5,116 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ── État bracelets (reçu depuis Python) ────────────────────
+// ── Utilitaire ────────────────────────────────────────────────
+function uid() { return Math.random().toString(36).slice(2) + Date.now().toString(36); }
+
+// ── Auth ──────────────────────────────────────────────────────
+const users = {};    // { [id]: { id, email, password, nom } }
+const sessions = {}; // { [token]: userId }
+
+// Compte de démo toujours disponible au démarrage
+const _demoId = uid();
+users[_demoId] = { id: _demoId, email: 'demo@brace4safe.fr', password: 'demo123', nom: 'Compte démo' };
+console.log('Compte démo : demo@brace4safe.fr / demo123');
+
+function requireAuth(req, res, next) {
+  const auth = req.headers['authorization'];
+  const token = auth?.startsWith('Bearer ') ? auth.slice(7) : null;
+  const userId = token ? sessions[token] : null;
+  if (!userId) return res.status(401).json({ error: 'Non authentifié' });
+  req.userId = userId;
+  req.user = users[userId];
+  next();
+}
+
+app.post('/api/auth/register', (req, res) => {
+  const { email, password, nom } = req.body ?? {};
+  if (!email || !password || !nom) return res.status(400).json({ error: 'Champs requis manquants' });
+  if (Object.values(users).find(u => u.email === email))
+    return res.status(409).json({ error: 'Cet email est déjà utilisé' });
+  const id = uid();
+  users[id] = { id, email, password, nom };
+  const token = uid();
+  sessions[token] = id;
+  res.json({ token, user: { id, email, nom } });
+});
+
+app.post('/api/auth/login', (req, res) => {
+  const { email, password } = req.body ?? {};
+  const user = Object.values(users).find(u => u.email === email && u.password === password);
+  if (!user) return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
+  const token = uid();
+  sessions[token] = user.id;
+  res.json({ token, user: { id: user.id, email: user.email, nom: user.nom } });
+});
+
+app.post('/api/auth/logout', requireAuth, (req, res) => {
+  const token = req.headers['authorization']?.slice(7);
+  delete sessions[token];
+  res.sendStatus(204);
+});
+
+app.get('/api/auth/me', requireAuth, (req, res) => {
+  const { id, email, nom } = req.user;
+  res.json({ id, email, nom });
+});
+
+// ── Événements ────────────────────────────────────────────────
+const events = {}; // { [id]: { id, userId, nom, lieu, type, date, nbBracelets, statut, malaises[], createdAt } }
+
+app.post('/api/events', requireAuth, (req, res) => {
+  const { nom, lieu, type, date, nbBracelets } = req.body ?? {};
+  if (!nom || !lieu || !type || !date) return res.status(400).json({ error: 'Champs requis manquants' });
+  const id = uid();
+  events[id] = { id, userId: req.userId, nom, lieu, type, date, nbBracelets: nbBracelets || 0, statut: 'planifie', malaises: [], createdAt: new Date().toISOString() };
+  res.json({ ...events[id], malaises: undefined, totalMalaises: 0 });
+});
+
+app.get('/api/events', requireAuth, (req, res) => {
+  const list = Object.values(events)
+    .filter(e => e.userId === req.userId)
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .map(e => ({ ...e, malaises: undefined, totalMalaises: e.malaises.length }));
+  res.json(list);
+});
+
+app.patch('/api/events/:id/activate', requireAuth, (req, res) => {
+  const event = events[req.params.id];
+  if (!event || event.userId !== req.userId) return res.status(404).json({ error: 'Introuvable' });
+  Object.values(events).filter(e => e.userId === req.userId && e.statut === 'actif').forEach(e => { e.statut = 'planifie'; });
+  event.statut = 'actif';
+  res.json({ ...event, malaises: undefined, totalMalaises: event.malaises.length });
+});
+
+app.patch('/api/events/:id/close', requireAuth, (req, res) => {
+  const event = events[req.params.id];
+  if (!event || event.userId !== req.userId) return res.status(404).json({ error: 'Introuvable' });
+  event.statut = 'termine';
+  res.json({ ...event, malaises: undefined, totalMalaises: event.malaises.length });
+});
+
+// ── Malaises ──────────────────────────────────────────────────
+app.post('/api/malaises', requireAuth, (req, res) => {
+  const { eventId, malaise } = req.body ?? {};
+  const event = eventId ? events[eventId] : null;
+  if (!event || event.userId !== req.userId) return res.status(404).json({ error: 'Événement introuvable' });
+  const m = { ...malaise, id: uid(), eventId, userId: req.userId, date: malaise?.date || new Date().toISOString().slice(0, 10) };
+  event.malaises.push(m);
+  res.json(m);
+});
+
+app.get('/api/malaises', requireAuth, (req, res) => {
+  const { eventId } = req.query;
+  if (eventId) {
+    const event = events[eventId];
+    if (!event || event.userId !== req.userId) return res.status(404).json({ error: 'Introuvable' });
+    return res.json(event.malaises);
+  }
+  const all = Object.values(events).filter(e => e.userId === req.userId).flatMap(e => e.malaises);
+  res.json(all);
+});
+
+// ── État bracelets (reçu depuis Python) ──────────────────────
 let braceletsState = {};
 
 app.get('/', (req, res) => res.send('Backend OK'));
@@ -24,7 +133,7 @@ app.get('/api/bracelet', (req, res) => {
   res.json(enAlerte);
 });
 
-// ── Simulation design-test (anciennement port 3001) ────────
+// ── Simulation design-test ────────────────────────────────────
 const NUM_BRACELETS = 3;
 const HISTORY = 60;
 
@@ -50,16 +159,10 @@ function computeRSSI(bx, by, ax, ay) {
 }
 
 const simState = Array.from({ length: NUM_BRACELETS }, (_, i) => ({
-  id: i + 1,
-  level: 0,
-  malaise: null,
-  x: rand(180, 620),
-  y: rand(180, 350),
-  vx: rand(-1.5, 1.5),
-  vy: rand(-1.5, 1.5),
-  bpm:  rand(65, 80),
-  spo2: rand(97, 99),
-  temp: rand(36.4, 37.0),
+  id: i + 1, level: 0, malaise: null,
+  x: rand(180, 620), y: rand(180, 350),
+  vx: rand(-1.5, 1.5), vy: rand(-1.5, 1.5),
+  bpm: rand(65, 80), spo2: rand(97, 99), temp: rand(36.4, 37.0),
   history: { bpm: [], spo2: [], temp: [], ts: [] },
 }));
 
@@ -118,5 +221,5 @@ app.get('/api/design-test/bracelets', (_, res) => {
   });
 });
 
-// ── Démarrage ──────────────────────────────────────────────
+// ── Démarrage ─────────────────────────────────────────────────
 app.listen(3000, () => console.log('Serveur lancé sur http://localhost:3000'));
