@@ -68,6 +68,26 @@ export class AuthService {
     this.setSession(data.token, data.user);
   }
 
+  async validateToken(): Promise<boolean> {
+    const token = this._token();
+    if (!token) return false;
+    try {
+      const res = await fetch(`${this.API}/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  clearSession(): void {
+    this._token.set(null);
+    this._user.set(null);
+    localStorage.removeItem('bfs_token');
+    localStorage.removeItem('bfs_user');
+  }
+
   async logout(): Promise<void> {
     const token = this._token();
     if (token) {
@@ -76,9 +96,6 @@ export class AuthService {
         headers: { Authorization: `Bearer ${token}` },
       }).catch(() => {});
     }
-    this._token.set(null);
-    this._user.set(null);
-    localStorage.removeItem('bfs_token');
-    localStorage.removeItem('bfs_user');
+    this.clearSession();
   }
 }

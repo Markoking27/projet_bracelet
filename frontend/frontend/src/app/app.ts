@@ -18,6 +18,13 @@ export class App implements OnInit {
 
   async ngOnInit() {
     if (this.auth.isAuthenticated()) {
+      const valid = await this.auth.validateToken();
+      if (!valid) {
+        this.auth.clearSession();
+        this.eventService.clearLocalState();
+        this.router.navigate(['/login']);
+        return;
+      }
       await this.eventService.loadEvents();
     }
   }

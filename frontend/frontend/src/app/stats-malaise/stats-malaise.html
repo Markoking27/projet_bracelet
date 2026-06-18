@@ -3,6 +3,9 @@
   <div class="header">
     <h1>LABORATOIRE - ANALYSE DES MALAISES</h1>
     <p>Dashboard médical temps réel</p>
+    <button class="btn-seed" (click)="generateFakeData()" [disabled]="seeding">
+      {{ seeding ? 'Génération…' : '⚡ Générer des données de test' }}
+    </button>
   </div>
 
   <div class="kpis">

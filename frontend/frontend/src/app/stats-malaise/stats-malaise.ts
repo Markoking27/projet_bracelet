@@ -2,9 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
 import { Chart, registerables, ChartData, ChartType } from 'chart.js';
-import { SupabaseService } from '../services/supabase';
+import { AuthService } from '../services/auth.service';
 
 Chart.register(...registerables);
+
+const API = 'http://localhost:3000';
 
 @Component({
   selector: 'app-stats-malaise',
@@ -16,9 +18,10 @@ Chart.register(...registerables);
 export class StatsMalaiseComponent implements OnInit {
 
   loading = true;
+  seeding = false;
   malaises: any[] = [];
 
-  constructor(private supabase: SupabaseService) {}
+  constructor(private auth: AuthService) {}
 
   async ngOnInit() {
     await this.loadData();
@@ -74,23 +77,31 @@ export class StatsMalaiseComponent implements OnInit {
     }
   };
 
+  private headers() {
+    return { 'Content-Type': 'application/json', Authorization: `Bearer ${this.auth.getToken()}` };
+  }
+
   async loadData() {
     this.loading = true;
-
-    const { data, error } = await this.supabase
-      .getClient()
-      .from('malaises')
-      .select('*');
-
-    if (error) {
-      console.error(error);
-      this.loading = false;
-      return;
+    try {
+      const res = await fetch(`${API}/api/malaises`, { headers: this.headers() });
+      this.malaises = res.ok ? await res.json() : [];
+    } catch {
+      this.malaises = [];
     }
-
-    this.malaises = data ?? [];
     this.buildAll();
     this.loading = false;
+  }
+
+  async generateFakeData() {
+    this.seeding = true;
+    try {
+      await fetch(`${API}/api/seed`, { method: 'POST', headers: this.headers() });
+      await this.loadData();
+    } catch {
+      this.seeding = false;
+    }
+    this.seeding = false;
   }
 
   // ======================

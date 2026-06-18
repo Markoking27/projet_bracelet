@@ -20,11 +20,6 @@ export const routes: Routes = [
     loadComponent: () => import('./simulation-bracelet/simulation-bracelet').then(m => m.SimulationBracelet),
   },
   {
-    path: 'design-test',
-    canActivate: [authGuard],
-    loadComponent: () => import('./design-test/dashboard/dashboard').then(m => m.DashboardComponent),
-  },
-  {
     path: 'liste-malaise',
     canActivate: [authGuard],
     loadComponent: () => import('./liste-malaise/liste-malaise').then(m => m.ListeMalaise),

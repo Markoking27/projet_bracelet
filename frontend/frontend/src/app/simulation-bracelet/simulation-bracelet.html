@@ -3,7 +3,8 @@
   <p class="subtitle">Surveillance biométrique en temps réel</p>
 
   <div class="toolbar">
-    <button class="btn-add" (click)="addBracelet()">
+    <button class="btn-primary" (click)="addBracelet()">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       Ajouter un bracelet
     </button>
   </div>
@@ -102,11 +103,7 @@
 
 </div>
 
-<ng-template #attenteReel>
-  <div class="stat-card waiting-card">
-    <span>📡 En attente du bracelet réel...</span>
-  </div>
-</ng-template>
+<ng-template #attenteReel></ng-template>
 
   <!-- Alertes + carte -->
   <div class="dashboard-layout">
@@ -179,8 +176,9 @@
     <span>Clique sur la carte pour placer B1, B2 et B3. Les balises sont ensuite déplaçables.</span>
   </div>
 
-  <button type="button" (click)="placerBalises()">
-    Placer 3 balises
+  <button type="button" class="btn-secondary" (click)="placerBalises()">
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="5" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M6.5 1C4.015 1 2 3.015 2 5.5c0 3.375 4.5 6.5 4.5 6.5s4.5-3.125 4.5-6.5C11 3.015 8.985 1 6.5 1Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+    Placer les balises
   </button>
 </div>
 
@@ -249,37 +247,52 @@
 
         <div class="summary-grid">
           <div class="summary-metric">
-            <div class="metric-label">{{ b.isReal ? 'BPM' : 'FC' }}</div>
-            <div class="metric-value">{{ b.isReal ? (b.bpm ?? '--') : (b.fc ?? '--') }} bpm</div>
+            <div class="metric-label">BPM</div>
+            <div class="metric-value">{{ b.bpm ?? b.fc ?? '--' }} bpm</div>
           </div>
 
           <div class="summary-metric">
-            <div class="metric-label">{{ b.isReal ? 'SpO2' : 'HRV' }}</div>
+            <div class="metric-label">SpO₂</div>
+            <div class="metric-value">{{ b.spo2 !== undefined ? (b.spo2 + ' %') : '--' }}</div>
+          </div>
+
+          <div class="summary-metric">
+            <div class="metric-label">Température</div>
             <div class="metric-value">
-              {{ b.isReal ? (b.spo2 !== undefined ? (b.spo2 + ' %') : '--') : (b.hrv !== undefined ? (b.hrv + ' ms') : '--') }}
+              {{ b.temperature !== undefined ? (b.temperature + ' °C') : (b.humidity !== undefined ? (b.humidity + ' %') : '--') }}
             </div>
           </div>
 
           <div class="summary-metric">
-            <div class="metric-label">{{ b.isReal ? 'Humidité' : 'Temp' }}</div>
-            <div class="metric-value">
-              {{ b.isReal ? (b.humidity !== undefined ? (b.humidity + ' %') : '--') : (b.temperature !== undefined ? (b.temperature + ' °C') : '--') }}
-            </div>
-          </div>
-
-          <div class="summary-metric">
-            <div class="metric-label">Position</div>
-            <div class="metric-value">
-              <span *ngIf="b.x !== undefined && b.y !== undefined; else noPosition">
-                x: {{ b.x }} / y: {{ b.y }}
-              </span>
-              <ng-template #noPosition>--</ng-template>
-            </div>
+            <div class="metric-label">Niveau</div>
+            <div class="metric-value">{{ getLevelLabel(b.level) }}</div>
           </div>
         </div>
 
         <div class="summary-alert" *ngIf="b.level > 0">
           {{ b.malaise || 'Attention requise' }}
+        </div>
+
+        <!-- Mini graphiques au clic -->
+        <div class="mini-charts" *ngIf="isSelected(b) && hasMiniChart(b)">
+          <div class="mini-chart-block">
+            <span class="mini-chart-label" style="color:#ef4444">BPM</span>
+            <div class="mini-chart-wrap">
+              <canvas baseChart [data]="getBpmMiniChart(b)" [type]="lineChartType" [options]="miniChartOptions"></canvas>
+            </div>
+          </div>
+          <div class="mini-chart-block">
+            <span class="mini-chart-label" style="color:#0ea5e9">SpO₂</span>
+            <div class="mini-chart-wrap">
+              <canvas baseChart [data]="getSpo2MiniChart(b)" [type]="lineChartType" [options]="miniChartOptions"></canvas>
+            </div>
+          </div>
+          <div class="mini-chart-block">
+            <span class="mini-chart-label" style="color:#8b5cf6">Temp</span>
+            <div class="mini-chart-wrap">
+              <canvas baseChart [data]="getTempMiniChart(b)" [type]="lineChartType" [options]="miniChartOptions"></canvas>
+            </div>
+          </div>
         </div>
       </div>
     </div>

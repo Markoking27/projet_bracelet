@@ -12,10 +12,13 @@ function uid() { return Math.random().toString(36).slice(2) + Date.now().toStrin
 const users = {};    // { [id]: { id, email, password, nom } }
 const sessions = {}; // { [token]: userId }
 
-// Compte de démo toujours disponible au démarrage
+// Comptes toujours disponibles au démarrage
 const _demoId = uid();
 users[_demoId] = { id: _demoId, email: 'demo@brace4safe.fr', password: 'demo123', nom: 'Compte démo' };
+const _testId = uid();
+users[_testId] = { id: _testId, email: 'test@example.com', password: 'test', nom: 'Compte test' };
 console.log('Compte démo : demo@brace4safe.fr / demo123');
+console.log('Compte test : test@example.com / test');
 
 function requireAuth(req, res, next) {
   const auth = req.headers['authorization'];
@@ -61,6 +64,96 @@ app.get('/api/auth/me', requireAuth, (req, res) => {
 
 // ── Événements ────────────────────────────────────────────────
 const events = {};
+
+// ── Seed automatique pour test@example.com ────────────────────
+(function seedTest() {
+  const TYPES    = ['vagal','déshydratation','hypoglycémie','chaleur','alcool','chute'];
+  const GRAVITES = ['faible','moderee','elevee'];
+  const SEXES    = ['homme','femme','np'];
+  const AGES     = ['<18','18-25','26-35','36-50','>50'];
+  const ZONES    = ['milieu','avant_scene','arriere'];
+  const DENSITES = ['faible','moyenne','forte'];
+  const EVTS     = ['musique','sport','politique'];
+  const ALCOELS  = ['faible','modere','non_mesure','eleve'];
+  const TEMPS    = ['<10','10-20','>20'];
+  const DATES    = ['2024-07-14','2024-07-15','2024-07-16','2024-07-17','2024-07-18'];
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+
+  const evtId = uid();
+  events[evtId] = {
+    id: evtId, userId: _testId,
+    nom: 'Festival Été 2024', lieu: 'Paris', type: 'musique',
+    date: '2024-07-15', nbBracelets: 50,
+    statut: 'actif', malaises: [],
+    createdAt: new Date().toISOString(),
+  };
+
+  for (let i = 0; i < 60; i++) {
+    const h = Math.floor(Math.random() * 14) + 10;
+    const m = Math.floor(Math.random() * 60);
+    events[evtId].malaises.push({
+      id: uid(), eventId: evtId, userId: _testId,
+      date:         pick(DATES),
+      type:         pick(TYPES),
+      age:          pick(AGES),
+      sexe:         pick(SEXES),
+      zone:         pick(ZONES),
+      densite:      pick(DENSITES),
+      event:        pick(EVTS),
+      gravite:      pick(GRAVITES),
+      intervention: 'oui',
+      temps:        pick(TEMPS),
+      alcool:       pick(ALCOELS),
+      heure:        `${h}:${String(m).padStart(2, '0')}`,
+    });
+  }
+  console.log(`Seed : 60 malaises créés pour test@example.com (événement "${events[evtId].nom}")`);
+})();
+
+// ── Seed automatique pour demo@brace4safe.fr ─────────────────
+(function seedDemo() {
+  const TYPES    = ['vagal','déshydratation','hypoglycémie','chaleur','alcool','chute'];
+  const GRAVITES = ['faible','moderee','elevee'];
+  const SEXES    = ['homme','femme','np'];
+  const AGES     = ['<18','18-25','26-35','36-50','>50'];
+  const ZONES    = ['milieu','avant_scene','arriere'];
+  const DENSITES = ['faible','moyenne','forte'];
+  const EVTS     = ['musique','sport','politique'];
+  const ALCOELS  = ['faible','modere','non_mesure','eleve'];
+  const TEMPS    = ['<10','10-20','>20'];
+  const DATES    = ['2024-07-14','2024-07-15','2024-07-16','2024-07-17','2024-07-18'];
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+
+  const evtId = uid();
+  events[evtId] = {
+    id: evtId, userId: _demoId,
+    nom: 'Festival Été 2024', lieu: 'Paris', type: 'musique',
+    date: '2024-07-15', nbBracelets: 50,
+    statut: 'actif', malaises: [],
+    createdAt: new Date().toISOString(),
+  };
+
+  for (let i = 0; i < 60; i++) {
+    const h = Math.floor(Math.random() * 14) + 10;
+    const m = Math.floor(Math.random() * 60);
+    events[evtId].malaises.push({
+      id: uid(), eventId: evtId, userId: _demoId,
+      date:         pick(DATES),
+      type:         pick(TYPES),
+      age:          pick(AGES),
+      sexe:         pick(SEXES),
+      zone:         pick(ZONES),
+      densite:      pick(DENSITES),
+      event:        pick(EVTS),
+      gravite:      pick(GRAVITES),
+      intervention: 'oui',
+      temps:        pick(TEMPS),
+      alcool:       pick(ALCOELS),
+      heure:        `${h}:${String(m).padStart(2, '0')}`,
+    });
+  }
+  console.log(`Seed : 60 malaises créés pour demo@brace4safe.fr (événement "${events[evtId].nom}")`);
+})();
 
 app.post('/api/events', requireAuth, (req, res) => {
   const { nom, lieu, type, date, nbBracelets } = req.body ?? {};
@@ -116,6 +209,7 @@ app.get('/api/malaises', requireAuth, (req, res) => {
 
 // ── État bracelets simulation Python ──────────────────────────
 let braceletsState = {};
+let simBracelets = {}; // données complètes poussées par Python
 
 // ── État vrai bracelet (envoyé par le hardware) ───────────────
 let realBracelet = null;
@@ -126,8 +220,12 @@ app.get('/', (req, res) => res.send('Backend OK'));
 app.post('/api/bracelet', (req, res) => {
   const { id, level, malaise } = req.body;
   braceletsState[id] = { id, level, malaise, time: new Date().toISOString() };
-  console.log('État mis à jour :', braceletsState[id]);
+  simBracelets[id] = { ...req.body, time: new Date().toISOString() };
   res.sendStatus(200);
+});
+
+app.get('/api/sim-bracelets', (req, res) => {
+  res.json(Object.values(simBracelets));
 });
 
 app.get('/api/bracelet', (req, res) => {
@@ -246,6 +344,68 @@ app.get('/api/design-test/bracelets', (_, res) => {
       alerte:    simState.filter(b => b.level === 2).length,
       urgence:   simState.filter(b => b.level === 3).length,
     },
+  });
+});
+
+// ── Seed données de test ──────────────────────────────────────
+app.post('/api/seed', requireAuth, (req, res) => {
+  const TYPES    = ['vagal','déshydratation','hypoglycémie','chaleur','alcool','chute'];
+  const GRAVITES = ['faible','moderee','elevee'];
+  const SEXES    = ['homme','femme','np'];
+  const AGES     = ['<18','18-25','26-35','36-50','>50'];
+  const ZONES    = ['milieu','avant_scene','arriere'];
+  const DENSITES = ['faible','moyenne','forte'];
+  const EVENTS   = ['musique','sport','politique'];
+  const ALCOELS  = ['faible','modere','non_mesure','eleve'];
+  const TEMPS    = ['<10','10-20','>20'];
+  const DATES    = ['2024-07-14','2024-07-15','2024-07-16','2024-07-17','2024-07-18'];
+
+  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+  const eventId = uid();
+  events[eventId] = {
+    id: eventId,
+    userId: req.userId,
+    nom: 'Festival Été Test',
+    lieu: 'Paris',
+    type: 'musique',
+    date: '2024-07-15',
+    nbBracelets: 50,
+    statut: 'actif',
+    malaises: [],
+    createdAt: new Date().toISOString(),
+  };
+
+  // Désactiver les autres événements actifs
+  Object.values(events)
+    .filter(e => e.userId === req.userId && e.id !== eventId && e.statut === 'actif')
+    .forEach(e => { e.statut = 'planifie'; });
+
+  for (let i = 0; i < 50; i++) {
+    const h = Math.floor(Math.random() * 14) + 10;
+    const m = Math.floor(Math.random() * 60);
+    events[eventId].malaises.push({
+      id: uid(),
+      eventId,
+      userId: req.userId,
+      date:        pick(DATES),
+      type:        pick(TYPES),
+      age:         pick(AGES),
+      sexe:        pick(SEXES),
+      zone:        pick(ZONES),
+      densite:     pick(DENSITES),
+      event:       pick(EVENTS),
+      gravite:     pick(GRAVITES),
+      intervention:'oui',
+      temps:       pick(TEMPS),
+      alcool:      pick(ALCOELS),
+      heure:       `${h}:${String(m).padStart(2,'0')}`,
+    });
+  }
+
+  res.json({
+    event: { ...events[eventId], malaises: undefined, totalMalaises: 50 },
+    total: 50,
   });
 });
 

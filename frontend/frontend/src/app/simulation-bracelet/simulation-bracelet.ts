@@ -16,6 +16,18 @@ export class SimulationBracelet implements OnInit, OnDestroy {
   bracelets: Bracelet[] = [];
   selectedBracelet: Bracelet | null = null;
 
+  private readonly simPositions = new Map<number, { x: number; y: number }>();
+
+  private getSimPos(id: number): { x: number; y: number } {
+    if (!this.simPositions.has(id)) {
+      this.simPositions.set(id, {
+        x: Math.round(10 + Math.random() * 80),
+        y: Math.round(10 + Math.random() * 80),
+      });
+    }
+    return this.simPositions.get(id)!;
+  }
+
   balises: { id: string; x: number | null; y: number | null }[] = [
     { id: 'B1', x: 20, y: 30 },
     { id: 'B2', x: 60, y: 30 },
@@ -189,7 +201,17 @@ getBalisePosition(balise: { x: number | null; y: number | null }): { left: strin
 fetchData(): void {
     this.braceletService.getBracelets().subscribe({
       next: data => {
-        this.bracelets = data;
+        this.bracelets = data.map(b => {
+          const pos = b.level > 0 && b.x === undefined ? this.getSimPos(b.id) : {};
+          return {
+            ...b,
+            ...(pos as object),
+            fcHistory:           b.fcHistory           ?? b.history?.bpm,
+            temperatureHistory:  b.temperatureHistory  ?? b.history?.temperature,
+            spo2History:         (b as any).spo2History ?? b.history?.spo2,
+            labels:              b.labels              ?? b.history?.labels,
+          };
+        });
         if(this.realBracelet) this.injectRealBracelet();
 
         if (this.selectedBracelet) {
@@ -417,6 +439,24 @@ getRealBraceletPositionLabel(): string {
     };
   }
 
+  get spo2ChartData(): ChartConfiguration<'line'>['data'] {
+    const b = this.selectedBracelet;
+    return {
+      labels: b?.labels ?? [],
+      datasets: [
+        {
+          data: (b as any)?.spo2History ?? [],
+          label: 'SpO₂',
+          borderColor: '#22d3ee',
+          backgroundColor: 'rgba(34,211,238,0.15)',
+          tension: 0.35,
+          fill: false,
+          pointRadius: 0
+        }
+      ]
+    };
+  }
+
   get tempChartData(): ChartConfiguration<'line'>['data'] {
     const b = this.selectedBracelet;
     return {
@@ -436,6 +476,71 @@ getRealBraceletPositionLabel(): string {
   }
 
   lineChartType: 'line' = 'line';
+
+  readonly modes = ['normal', 'effort', 'vagal', 'deshydratation', 'chaleur', 'alcool'];
+  readonly modeLabels: Record<string, string> = {
+    normal: 'Normal', effort: 'Effort', vagal: 'Vagal',
+    deshydratation: 'Déshydratation', chaleur: 'Coup de chaleur', alcool: 'Alcool',
+  };
+
+  onModeChange(id: number, event: Event): void {
+    const mode = (event.target as HTMLSelectElement).value;
+    this.braceletService.setBraceletMode(id, mode).subscribe({
+      error: err => console.error('Erreur changement de mode', err)
+    });
+  }
+
+  miniChartOptions: ChartOptions<'line'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: false,
+    plugins: { legend: { display: false }, tooltip: { enabled: false } },
+    scales: {
+      x: { display: false },
+      y: { display: false },
+    },
+  };
+
+  getBpmMiniChart(b: Bracelet): ChartConfiguration<'line'>['data'] {
+    return {
+      labels: b.labels ?? [],
+      datasets: [{
+        data: b.fcHistory ?? (b.history?.bpm) ?? [],
+        borderColor: '#ef4444',
+        backgroundColor: 'rgba(239,68,68,0.1)',
+        tension: 0.4, fill: true, pointRadius: 0, borderWidth: 2,
+      }]
+    };
+  }
+
+  getSpo2MiniChart(b: Bracelet): ChartConfiguration<'line'>['data'] {
+    return {
+      labels: b.labels ?? [],
+      datasets: [{
+        data: (b as any).spo2History ?? (b.history?.spo2) ?? [],
+        borderColor: '#22d3ee',
+        backgroundColor: 'rgba(34,211,238,0.1)',
+        tension: 0.4, fill: true, pointRadius: 0, borderWidth: 2,
+      }]
+    };
+  }
+
+  getTempMiniChart(b: Bracelet): ChartConfiguration<'line'>['data'] {
+    return {
+      labels: b.labels ?? [],
+      datasets: [{
+        data: b.temperatureHistory ?? (b.history?.temperature) ?? [],
+        borderColor: '#8b5cf6',
+        backgroundColor: 'rgba(139,92,246,0.1)',
+        tension: 0.4, fill: true, pointRadius: 0, borderWidth: 2,
+      }]
+    };
+  }
+
+  hasMiniChart(b: Bracelet): boolean {
+    const bpmLen = (b.fcHistory ?? b.history?.bpm ?? []).length;
+    return bpmLen > 1;
+  }
 
   lineChartOptions: ChartOptions<'line'> = {
     responsive: true,
@@ -472,5 +577,30 @@ getRealBraceletPositionLabel(): string {
 
 getWarningAlertCount(): number {
   return this.braceletsEnAlerte().filter(b => b.level === 1).length;
+}
+
+fmt(val: number, decimals = 1): string {
+  if (val == null || isNaN(val)) return '—';
+  return val.toFixed(decimals);
+}
+
+padId(id: number): string {
+  return id < 10 ? `0${id}` : `${id}`;
+}
+
+simLevelLabel(l: number): string {
+  return ['NORMAL', 'ATTENTION', 'ALERTE', 'URGENCE'][l] ?? '—';
+}
+
+simLevelClass(l: number): string {
+  return ['normal', 'attention', 'alerte', 'urgence'][l] ?? '';
+}
+
+simModeLabel(mode: string): string {
+  const labels: Record<string, string> = {
+    normal: 'Normal', effort: 'Effort', vagal: 'Vagal',
+    deshydratation: 'Déshydratation', chaleur: 'Coup de chaleur', alcool: 'Alcool',
+  };
+  return labels[mode] ?? mode;
 }
 }
