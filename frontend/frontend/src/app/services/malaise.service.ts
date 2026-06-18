@@ -1,67 +1,96 @@
 import { Injectable } from '@angular/core';
+import { SupabaseService } from './supabase';
 import { AuthService } from './auth.service';
 import { EventService } from './event.service';
 
 export interface Malaise {
-  id?: string;
-  eventId?: string;
+  id?: number;
+
   date: string;
+  heure: string;
+
   type: string;
   age: string;
   sexe: string;
+
   zone: string;
   densite: string;
+
   event: string;
+  evenement: string;
+
   gravite: string;
   intervention: string;
+
   temps?: string;
   alcool?: string;
-  heure: string;
 }
 
 @Injectable({ providedIn: 'root' })
 export class MalaiseService {
-  private readonly API = 'http://localhost:3000/api/malaises';
-
   private _malaises: Malaise[] = [];
 
-  constructor(private auth: AuthService, private eventService: EventService) {}
+  constructor(
+    private auth: AuthService,
+    private eventService: EventService,
+    private supabaseService: SupabaseService   // ✅ AJOUT IMPORTANT
+  ) {}
 
-  private authHeaders() {
-    return {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${this.auth.getToken()}`,
-    };
-  }
-
+  // =========================
+  // GET LOCAL CACHE
+  // =========================
   getMalaises(): Malaise[] {
     return this._malaises;
   }
 
-  async loadMalaises(): Promise<void> {
-    if (!this.auth.isAuthenticated()) { this._malaises = []; return; }
-    const active = this.eventService.activeEvent();
-    const url = active ? `${this.API}?eventId=${active.id}` : this.API;
-    const res = await fetch(url, { headers: this.authHeaders() });
-    if (res.ok) this._malaises = await res.json();
-  }
-
+  // =========================
+  // LOAD FROM SUPABASE
+  // =========================
   async loadMalaisesForEvent(eventId: string | null): Promise<void> {
-    if (!this.auth.isAuthenticated()) { this._malaises = []; return; }
-    const url = eventId ? `${this.API}?eventId=${eventId}` : this.API;
-    const res = await fetch(url, { headers: this.authHeaders() });
-    if (res.ok) this._malaises = await res.json();
+
+    const supabase = this.supabaseService.getClient(); // ✅ IMPORTANT
+
+    let query = supabase.from('malaise').select('*');
+
+    if (eventId) {
+      const eventName =
+        this.eventService.events().find(e => e.id === eventId)?.nom;
+
+      if (eventName) {
+        query = query.eq('evenement', eventName);
+      }
+    }
+
+    const { data, error } = await query.order('date', { ascending: false });
+
+    if (error) {
+      console.error('Erreur load malaise:', error);
+      return;
+    }
+
+    this._malaises = data ?? [];
   }
 
+  async loadMalaises(): Promise<void> {
+    await this.loadMalaisesForEvent(null);
+  }
+
+  // =========================
+  // INSERT INTO SUPABASE
+  // =========================
   async addMalaise(m: Malaise): Promise<void> {
-    const active = this.eventService.activeEvent();
-    if (this.auth.isAuthenticated() && active) {
-      await fetch(this.API, {
-        method: 'POST',
-        headers: this.authHeaders(),
-        body: JSON.stringify({ eventId: active.id, malaise: m }),
-      });
+
+    const supabase = this.supabaseService.getClient(); // ✅ IMPORTANT
+
+    const { error } = await supabase
+      .from('malaise')
+      .insert([m]);
+
+    if (error) {
+      console.error('Erreur insert malaise:', error);
+      throw error;
     }
+
     this._malaises = [m, ...this._malaises];
   }
 }

@@ -44,37 +44,88 @@ export class FormulaireMalaise {
   }
 
   async onSubmit() {
-    this.submitted = true;
-    if (!this.form.valid) return;
+  this.submitted = true;
+  if (!this.form.valid) return;
 
-    this.saving = true;
-    const today = new Date();
+  this.saving = true;
 
-    const newMalaise = {
-      date: today.toISOString().split('T')[0],
-      type: this.form.value.typeMalaise === 'autre' ? this.form.value.autreType : this.form.value.typeMalaise,
-      age: this.form.value.trancheAge,
-      sexe: this.form.value.sexe,
-      zone: this.form.value.zone === 'annexe' ? this.form.value.zoneDetail : this.form.value.zone,
-      densite: this.form.value.densite,
-      event: this.form.value.typeEvent === 'autre' ? this.form.value.autreEvent : this.form.value.typeEvent,
-      gravite: this.form.value.gravite,
-      intervention: this.form.value.intervention,
-      temps: this.form.value.tempsPrise,
-      alcool: this.form.value.alcool,
-      heure: `${this.form.value.heure}:${String(this.form.value.minute).padStart(2, '0')}`,
-    };
+  const activeEvent = this.malaiseService['eventService'].activeEvent?.();
 
+  const today = new Date();
+
+  const newMalaise = {
+    // 📅 DATE : event actif sinon date du jour
+    date: activeEvent
+      ? activeEvent.date
+      : today.toISOString().split('T')[0],
+
+    // 🕒 HEURE : format SQL TIME (HH:MM:SS)
+    heure:
+      `${String(this.form.value.heure).padStart(2, '0')}:` +
+      `${String(this.form.value.minute).padStart(2, '0')}:00`,
+
+    // 🧠 TYPE
+    type:
+      this.form.value.typeMalaise === 'autre'
+        ? this.form.value.autreType
+        : this.form.value.typeMalaise,
+
+    // 👤 PROFIL
+    age: this.form.value.trancheAge,
+    sexe: this.form.value.sexe,
+
+    // 📍 ZONE
+    zone:
+      this.form.value.zone === 'annexe'
+        ? this.form.value.zoneDetail
+        : this.form.value.zone,
+
+    // 👥 DENSITÉ
+    densite: this.form.value.densite,
+
+    // 🎪 EVENT (type)
+    event:
+      this.form.value.typeEvent === 'autre'
+        ? this.form.value.autreEvent
+        : this.form.value.typeEvent,
+
+    // 🚨 GRAVITÉ
+    gravite: this.form.value.gravite,
+
+    // 🚑 INTERVENTION
+    intervention: this.form.value.intervention,
+
+    // ⏱ TEMPS PRISE EN CHARGE
+    temps: this.form.value.tempsPrise,
+
+    // 🍺 ALCOOL
+    alcool: this.form.value.alcool,
+
+    // 🏷 NOM ÉVÉNEMENT ACTIF (ou vide)
+    evenement: activeEvent ? activeEvent.nom : ''
+  };
+
+  try {
     await this.malaiseService.addMalaise(newMalaise);
 
-    this.saving = false;
     this.saved = true;
     this.form.reset();
     this.submitted = false;
-    setTimeout(() => (this.saved = false), 3000);
-  }
 
-  isInvalid(control: string) {
-    return !!(this.form.get(control)?.invalid && this.submitted);
+    setTimeout(() => (this.saved = false), 3000);
+
+  } catch (err) {
+    console.error('Erreur insertion Supabase:', err);
+  } finally {
+    this.saving = false;
   }
+}
+
+isInvalid(control: string): boolean {
+  return !!(
+    this.form.get(control)?.invalid &&
+    this.submitted
+  );
+}
+
 }
