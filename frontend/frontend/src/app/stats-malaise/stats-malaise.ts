@@ -3,12 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
 import { Chart, registerables, ChartData, ChartType } from 'chart.js';
+
 import { AuthService } from '../services/auth.service';
 import { EventService, BraceEvent } from '../services/event.service';
+import { SupabaseService } from '../services/supabase';
 
 Chart.register(...registerables);
-
-const API = 'http://localhost:3000';
 
 @Component({
   selector: 'app-stats-malaise',
@@ -24,22 +24,32 @@ export class StatsMalaiseComponent implements OnInit {
   events: BraceEvent[] = [];
   selectedEventId = '';
 
-  private allMalaises: any[] = [];
+  allMalaises: any[] = [];
 
-  constructor(private auth: AuthService, private eventService: EventService) {}
+  constructor(
+    private auth: AuthService,
+    private eventService: EventService,
+    private supabase: SupabaseService
+  ) {}
 
   async ngOnInit() {
     await this.eventService.loadEvents();
     this.events = this.eventService.events();
-    const active = this.eventService.activeEvent();
-    this.selectedEventId = active?.id ?? '';
+
+    this.selectedEventId = this.eventService.activeEvent()?.id ?? '';
+
     await this.loadData();
+  }
+
+  get selectedEventName(): string {
+    if (!this.selectedEventId) return '';
+    return this.events.find(e => e.id === this.selectedEventId)?.nom ?? '';
   }
 
   barType: ChartType = 'bar';
   lineType: ChartType = 'line';
-  doughnutType: ChartType = 'doughnut';
   pieType: ChartType = 'pie';
+  doughnutType: ChartType = 'doughnut';
 
   totalMalaises = 0;
   graviteElevee = 0;
@@ -66,140 +76,166 @@ export class StatsMalaiseComponent implements OnInit {
     }
   };
 
-  private headers() {
-    return { 'Content-Type': 'application/json', Authorization: `Bearer ${this.auth.getToken()}` };
-  }
-
   async loadData() {
+
     this.loading = true;
-    try {
-      const res = await fetch(`${API}/api/malaises`, { headers: this.headers() });
-      this.allMalaises = res.ok ? await res.json() : [];
-    } catch {
-      this.allMalaises = [];
+
+    const client = this.supabase.getClient();
+
+    let query = client.from('malaise').select('*');
+
+    if (this.selectedEventId) {
+      const eventName =
+        this.events.find(e => e.id === this.selectedEventId)?.nom;
+
+      if (eventName) {
+        query = query.eq('evenement', eventName);
+      }
     }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error(error);
+      this.allMalaises = [];
+    } else {
+      this.allMalaises = data ?? [];
+    }
+
     this.buildAll();
     this.loading = false;
   }
 
-  onEventChange() {
-    this.buildAll();
+  async onEventChange() {
+    await this.loadData();
   }
 
-  get filteredMalaises() {
-    if (!this.selectedEventId) return this.allMalaises;
-    return this.allMalaises.filter(m => m.eventId === this.selectedEventId);
-  }
-
-  get selectedEventName(): string {
-    if (!this.selectedEventId) return '';
-    return this.events.find(e => e.id === this.selectedEventId)?.nom ?? '';
+  get malaises() {
+    return this.allMalaises;
   }
 
   buildAll() {
-    const malaises = this.filteredMalaises;
+
+    const malaises = this.malaises;
 
     this.totalMalaises = malaises.length;
     this.graviteElevee = malaises.filter(m => m.gravite === 'elevee').length;
 
     const typeMap: Record<string, number> = {};
-    const graviteMap: Record<string, number> = { faible: 0, moderee: 0, elevee: 0 };
-    const sexeMap: Record<string, number> = { homme: 0, femme: 0, np: 0 };
+    const graviteMap = { faible: 0, moderee: 0, elevee: 0 };
+    const sexeMap = { homme: 0, femme: 0, np: 0 };
     const ageMap: Record<string, number> = {};
     const zoneMap: Record<string, number> = {};
-    const densiteMap: Record<string, number> = { faible: 0, moyenne: 0, forte: 0 };
+    const densiteMap = { faible: 0, moyenne: 0, forte: 0 };
     const eventMap: Record<string, number> = {};
-    const alcoolMap: Record<string, number> = { faible: 0, modere: 0, non_mesure: 0, eleve: 0 };
-    const tempsMap: Record<string, number> = { '<10': 0, '10-20': 0, '>20': 0 };
+    const alcoolMap = { faible: 0, modere: 0, non_mesure: 0, eleve: 0 };
+    const tempsMap = { '<10': 0, '10-20': 0, '>20': 0 };
     const dateMap: Record<string, number> = {};
-    const heureMap: number[] = Array(24).fill(0);
+    const heureMap = Array(24).fill(0);
 
     for (const m of malaises) {
+
       const validTypes = ['vagal','déshydratation','hypoglycémie','chaleur','alcool','chute'];
-      let t = m.type?.trim();
-      if (!t || !validTypes.includes(t)) t = 'autre';
+      const t = validTypes.includes(m.type) ? m.type : 'autre';
       typeMap[t] = (typeMap[t] || 0) + 1;
 
-      const graviteKey = m.gravite as keyof typeof graviteMap;
-      if (graviteMap[graviteKey] !== undefined) graviteMap[graviteKey]++;
+      if (graviteMap[m.gravite as keyof typeof graviteMap] !== undefined)
+        graviteMap[m.gravite as keyof typeof graviteMap]++;
 
-      const sexeKey = m.sexe as keyof typeof sexeMap;
-      if (sexeMap[sexeKey] !== undefined) sexeMap[sexeKey]++;
+      if (sexeMap[m.sexe as keyof typeof sexeMap] !== undefined)
+        sexeMap[m.sexe as keyof typeof sexeMap]++;
 
       if (m.age) ageMap[m.age] = (ageMap[m.age] || 0) + 1;
 
-      const validZones = ['milieu', 'avant_scene', 'arriere'];
-      let zoneKey = m.zone?.trim();
-      if (!zoneKey || !validZones.includes(zoneKey)) zoneKey = 'autre';
-      zoneMap[zoneKey] = (zoneMap[zoneKey] || 0) + 1;
+      const validZones = ['milieu','avant_scene','arriere'];
+      const z = validZones.includes(m.zone) ? m.zone : 'autre';
+      zoneMap[z] = (zoneMap[z] || 0) + 1;
 
-      const densiteKey = m.densite as keyof typeof densiteMap;
-      if (densiteMap[densiteKey] !== undefined) densiteMap[densiteKey]++;
+      if (densiteMap[m.densite as keyof typeof densiteMap] !== undefined)
+        densiteMap[m.densite as keyof typeof densiteMap]++;
 
-      const validEvents = ['sport', 'politique', 'musique'];
-      let eventKey = m.event?.trim();
-      if (!eventKey || !validEvents.includes(eventKey)) eventKey = 'autre';
-      eventMap[eventKey] = (eventMap[eventKey] || 0) + 1;
+      const validEvents = ['sport','politique','musique'];
+      const e = validEvents.includes(m.event) ? m.event : 'autre';
+      eventMap[e] = (eventMap[e] || 0) + 1;
 
-      const alcoolKey = m.alcool as keyof typeof alcoolMap;
-      if (alcoolMap[alcoolKey] !== undefined) alcoolMap[alcoolKey]++;
+      if (alcoolMap[m.alcool as keyof typeof alcoolMap] !== undefined)
+        alcoolMap[m.alcool as keyof typeof alcoolMap]++;
 
-      const tempsKey = m.temps as keyof typeof tempsMap;
-      if (tempsMap[tempsKey] !== undefined) tempsMap[tempsKey]++;
+      if (tempsMap[m.temps as keyof typeof tempsMap] !== undefined)
+        tempsMap[m.temps as keyof typeof tempsMap]++;
 
       if (m.date) dateMap[m.date] = (dateMap[m.date] || 0) + 1;
 
       if (m.heure) {
         const h = parseInt(m.heure.split(':')[0], 10);
-        if (!isNaN(h) && h >= 0 && h < 24) heureMap[h]++;
+        if (!isNaN(h)) heureMap[h]++;
       }
     }
+
+    // 🔥 FIX IMPORTANT : AJOUT DES LABELS POUR SUPPRIMER "undefined"
 
     this.typeChartData = {
       labels: Object.keys(typeMap),
       datasets: [{ label: 'Types de malaise', data: Object.values(typeMap) }]
     };
+
     this.graviteChartData = {
       labels: ['Faible','Modérée','Élevée'],
       datasets: [{ label: 'Gravité', data: Object.values(graviteMap) }]
     };
+
     this.sexeChartData = {
-      labels: ['Homme','Femme','Non précisé'],
+      labels: ['Homme','Femme','NP'],
       datasets: [{ label: 'Sexe', data: Object.values(sexeMap) }]
     };
+
     this.ageChartData = {
       labels: Object.keys(ageMap),
-      datasets: [{ label: 'Âge', data: Object.values(ageMap) }]
+      datasets: [{ label: 'Répartition par âge', data: Object.values(ageMap) }]
     };
+
     this.zoneChartData = {
       labels: Object.keys(zoneMap),
-      datasets: [{ label: 'Zone', data: Object.values(zoneMap) }]
+      datasets: [{ label: 'Zones', data: Object.values(zoneMap) }]
     };
+
     this.densiteChartData = {
       labels: ['Faible','Moyenne','Forte'],
       datasets: [{ label: 'Densité', data: Object.values(densiteMap) }]
     };
+
     this.eventChartData = {
       labels: Object.keys(eventMap),
-      datasets: [{ label: 'Événement', data: Object.values(eventMap) }]
+      datasets: [{ label: 'Événements', data: Object.values(eventMap) }]
     };
+
     this.alcoolChartData = {
       labels: ['Faible','Modéré','Non mesuré','Élevé'],
       datasets: [{ label: 'Alcool', data: Object.values(alcoolMap) }]
     };
+
     this.tempsChartData = {
-      labels: ['<10','10-20','>20'],
-      datasets: [{ label: 'Temps', data: Object.values(tempsMap) }]
+      labels: ['<10 min','10-20 min','>20 min'],
+      datasets: [{ label: "Temps d'intervention", data: Object.values(tempsMap) }]
     };
 
     const sortedDates = Object.keys(dateMap).sort();
+
     this.evolutionChartData = {
       labels: sortedDates,
-      datasets: [{ label: 'Malaises', data: sortedDates.map(d => dateMap[d]), tension: 0 }]
+      datasets: [{
+        label: 'Évolution des malaises',
+        data: sortedDates.map(d => dateMap[d]),
+        tension: 0.3
+      }]
     };
+
     this.heureChartData = {
       labels: Array.from({ length: 24 }, (_, i) => `${i}h`),
-      datasets: [{ label: 'Malaises', data: heureMap }]
+      datasets: [{
+        label: 'Répartition par heure',
+        data: heureMap
+      }]
     };
   }
 }
