@@ -1,39 +1,58 @@
 <div class="container">
-  <h2>Liste des malaises</h2>
+  <div class="page-header">
+    <div class="header-left">
+      <h2>Liste des malaises</h2>
+      @if (!loading) { <span class="count">{{ malaiseService.getMalaises().length }} entrée(s)</span> }
+    </div>
+    <div class="event-filter">
+      <label for="eventSelect">Événement</label>
+      <select id="eventSelect" [(ngModel)]="selectedEventId" (ngModelChange)="onEventChange()">
+        <option value="">Tous les événements</option>
+        @for (e of events; track e.id) {
+          <option [value]="e.id">{{ e.nom }} — {{ e.date }}</option>
+        }
+      </select>
+    </div>
+  </div>
 
-  <table>
+  @if (loading) { <div class="loading-row">Chargement…</div> }
+
+  @if (!loading) { <table>
     <thead>
       <tr>
         <th>Date</th>
+        <th>Heure</th>
         <th>Type</th>
+        <th>Gravité</th>
         <th>Âge</th>
         <th>Sexe</th>
         <th>Zone</th>
         <th>Densité</th>
         <th>Événement</th>
-        <th>Gravité</th>
+        <th>Alcool</th>
         <th>Intervention</th>
-        <th>Heure</th>
       </tr>
     </thead>
-
     <tbody>
-      @for (m of malaiseService.getMalaises(); track m.heure) {
-        <tr>
+      @for (m of malaiseService.getMalaises(); track m.id ?? m.heure) {
+        <tr [class.gravite-elevee]="m.gravite === 'elevee'" [class.gravite-moderee]="m.gravite === 'moderee'">
           <td>{{ m.date }}</td>
-          <td>{{ m.type }}</td>
+          <td>{{ m.heure }}</td>
+          <td class="type-cell">{{ m.type }}</td>
+          <td><span class="badge" [class]="'badge-' + m.gravite">{{ m.gravite }}</span></td>
           <td>{{ m.age }}</td>
           <td>{{ m.sexe }}</td>
           <td>{{ m.zone }}</td>
           <td>{{ m.densite }}</td>
           <td>{{ m.event }}</td>
-          <td>{{ m.gravite }}</td>
+          <td>{{ m.alcool ?? '—' }}</td>
           <td>{{ m.intervention }}</td>
-          <td>{{ m.heure }}</td>
         </tr>
       } @empty {
-        <tr><td colspan="10" style="text-align:center;color:#9ca3af;padding:24px">Aucun malaise enregistré pour cet événement.</td></tr>
+        <tr>
+          <td colspan="11" class="empty-cell">Aucun malaise enregistré{{ selectedEventId ? ' pour cet événement' : '' }}.</td>
+        </tr>
       }
     </tbody>
-  </table>
+  </table> }
 </div>

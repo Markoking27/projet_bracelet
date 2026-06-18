@@ -181,7 +181,7 @@ getBalisePosition(balise: { x: number | null; y: number | null }): { left: strin
     top: `${balise.y}%`
   };
 }
-  realBracelet : RealBracelet | null = null;
+  realBracelet: RealBracelet | null = null;
   private interval: any;
 
   constructor(

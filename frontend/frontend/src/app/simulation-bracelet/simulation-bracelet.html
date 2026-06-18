@@ -172,8 +172,8 @@
 
         <div class="map-actions">
   <div>
-    <strong>Simulation des balises</strong>
-    <span>Clique sur la carte pour placer B1, B2 et B3. Les balises sont ensuite déplaçables.</span>
+    <p class="map-action-title">Placement des balises</p>
+    <p class="map-action-desc">Cliquez sur la carte pour placer B1, B2 et B3. Les balises sont ensuite déplaçables.</p>
   </div>
 
   <button type="button" class="btn-secondary" (click)="placerBalises()">
@@ -211,12 +211,9 @@
       {{ b.isReal ? '🎯' : '📍' }}
     </div>
     <div class="marker-dot" [ngClass]="getLevelClass(b.level)"></div>
-
-    <div class="tooltip" *ngIf="isSelected(b)">
-      {{ getBraceletDisplayName(b) }}
-    </div>
+    <div class="tooltip" *ngIf="isSelected(b)">{{ getBraceletDisplayName(b) }}</div>
   </div>
-        </div>
+</div>
 
         <div class="map-footer">
           {{ getActiveCount() }} bracelets actifs &nbsp;&nbsp; {{ getRiskZoneCount() }} zones à risque identifiées

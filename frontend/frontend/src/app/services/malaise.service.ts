@@ -3,6 +3,8 @@ import { AuthService } from './auth.service';
 import { EventService } from './event.service';
 
 export interface Malaise {
+  id?: string;
+  eventId?: string;
   date: string;
   type: string;
   age: string;
@@ -37,12 +39,16 @@ export class MalaiseService {
   }
 
   async loadMalaises(): Promise<void> {
-    if (!this.auth.isAuthenticated()) {
-      this._malaises = [];
-      return;
-    }
+    if (!this.auth.isAuthenticated()) { this._malaises = []; return; }
     const active = this.eventService.activeEvent();
     const url = active ? `${this.API}?eventId=${active.id}` : this.API;
+    const res = await fetch(url, { headers: this.authHeaders() });
+    if (res.ok) this._malaises = await res.json();
+  }
+
+  async loadMalaisesForEvent(eventId: string | null): Promise<void> {
+    if (!this.auth.isAuthenticated()) { this._malaises = []; return; }
+    const url = eventId ? `${this.API}?eventId=${eventId}` : this.API;
     const res = await fetch(url, { headers: this.authHeaders() });
     if (res.ok) this._malaises = await res.json();
   }

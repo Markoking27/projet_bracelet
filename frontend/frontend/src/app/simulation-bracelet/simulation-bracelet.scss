@@ -283,6 +283,20 @@ h1 {
   border: 1px solid #e2e8f0;
 }
 
+.map-action-title {
+  margin: 0 0 4px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.map-action-desc {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #6b7280;
+}
+
+
 .balise {
   position: absolute;
   transform: translate(-50%, -50%);

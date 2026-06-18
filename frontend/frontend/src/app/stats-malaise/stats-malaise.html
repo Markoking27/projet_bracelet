@@ -1,11 +1,27 @@
 <div class="lab">
 
   <div class="header">
-    <h1>LABORATOIRE - ANALYSE DES MALAISES</h1>
-    <p>Dashboard médical temps réel</p>
-    <button class="btn-seed" (click)="generateFakeData()" [disabled]="seeding">
-      {{ seeding ? 'Génération…' : '⚡ Générer des données de test' }}
-    </button>
+    <div class="header-top">
+      <div>
+        <h1>LABORATOIRE — ANALYSE DES MALAISES</h1>
+        <p>Dashboard médical temps réel</p>
+      </div>
+      <div class="event-filter">
+        <label for="eventSelect">Filtrer par événement</label>
+        <select id="eventSelect" [(ngModel)]="selectedEventId" (ngModelChange)="onEventChange()">
+          <option value="">Tous les événements</option>
+          @for (e of events; track e.id) {
+            <option [value]="e.id">{{ e.nom }} — {{ e.date }}</option>
+          }
+        </select>
+      </div>
+    </div>
+    @if (selectedEventName) {
+      <div class="active-filter">
+        Affichage : <strong>{{ selectedEventName }}</strong>
+        <button class="clear-filter" (click)="selectedEventId = ''; onEventChange()">✕ Tout afficher</button>
+      </div>
+    }
   </div>
 
   <div class="kpis">
@@ -13,7 +29,6 @@
       <span>{{ totalMalaises }}</span>
       <p>Total malaises</p>
     </div>
-
     <div class="kpi danger">
       <span>{{ graviteElevee }}</span>
       <p>Gravité élevée</p>
@@ -21,82 +36,65 @@
   </div>
 
   <div class="section">
-  <h2>Répartition des données</h2>
-
-  <div class="grid">
-    <div class="card">
-      <h3>Gravité</h3>
-      <canvas baseChart [data]="graviteChartData" [type]="doughnutType"></canvas>
-    </div>
-
-    <div class="card">
-      <h3>Sexe</h3>
-      <canvas baseChart [data]="sexeChartData" [type]="pieType"></canvas>
-    </div>
-
-    <div class="card">
-      <h3>Densité</h3>
-      <canvas baseChart [data]="densiteChartData" [type]="doughnutType"></canvas>
-    </div>
-
-    <div class="card">
-      <h3>Événements</h3>
-      <canvas baseChart [data]="eventChartData" [type]="pieType"></canvas>
+    <h2>Répartition des données</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>Gravité</h3>
+        <canvas baseChart [data]="graviteChartData" [type]="doughnutType"></canvas>
+      </div>
+      <div class="card">
+        <h3>Sexe</h3>
+        <canvas baseChart [data]="sexeChartData" [type]="pieType"></canvas>
+      </div>
+      <div class="card">
+        <h3>Densité</h3>
+        <canvas baseChart [data]="densiteChartData" [type]="doughnutType"></canvas>
+      </div>
+      <div class="card">
+        <h3>Événements</h3>
+        <canvas baseChart [data]="eventChartData" [type]="pieType"></canvas>
+      </div>
     </div>
   </div>
-</div>
 
-
-<div class="section">
-  <h2>Analyse des facteurs</h2>
-
-  <div class="grid">
-
-    <div class="card">
-      <h3>Types</h3>
-      <canvas baseChart [data]="typeChartData" [type]="barType"></canvas>
+  <div class="section">
+    <h2>Analyse des facteurs</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>Types</h3>
+        <canvas baseChart [data]="typeChartData" [type]="barType"></canvas>
+      </div>
+      <div class="card">
+        <h3>Âge</h3>
+        <canvas baseChart [data]="ageChartData" [type]="barType"></canvas>
+      </div>
+      <div class="card">
+        <h3>Zone</h3>
+        <canvas baseChart [data]="zoneChartData" [type]="barType"></canvas>
+      </div>
+      <div class="card">
+        <h3>Alcool</h3>
+        <canvas baseChart [data]="alcoolChartData" [type]="barType"></canvas>
+      </div>
+      <div class="card large">
+        <h3>Temps d'intervention</h3>
+        <canvas baseChart [data]="tempsChartData" [type]="barType"></canvas>
+      </div>
     </div>
-
-    <div class="card">
-      <h3>Âge</h3>
-      <canvas baseChart [data]="ageChartData" [type]="barType"></canvas>
-    </div>
-
-    <div class="card">
-      <h3>Zone</h3>
-      <canvas baseChart [data]="zoneChartData" [type]="barType"></canvas>
-    </div>
-
-    <div class="card">
-      <h3>Alcool</h3>
-      <canvas baseChart [data]="alcoolChartData" [type]="barType"></canvas>
-    </div>
-
-    <div class="card large">
-      <h3>Temps</h3>
-      <canvas baseChart [data]="tempsChartData" [type]="barType"></canvas>
-    </div>
-
   </div>
-</div>
 
-
-<div class="section">
-  <h2>Évolution temporelle</h2>
-
-  <div class="grid">
-
-    <div class="card">
-      <h3>Évolution</h3>
-      <canvas baseChart [data]="evolutionChartData" [type]="lineType"></canvas>
+  <div class="section">
+    <h2>Évolution temporelle</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>Évolution par date</h3>
+        <canvas baseChart [data]="evolutionChartData" [type]="lineType"></canvas>
+      </div>
+      <div class="card">
+        <h3>Répartition par heure</h3>
+        <canvas baseChart [data]="heureChartData" [type]="lineType"></canvas>
+      </div>
     </div>
-
-    <div class="card">
-      <h3>Heures</h3>
-      <canvas baseChart [data]="heureChartData" [type]="lineType"></canvas>
-    </div>
-
   </div>
-</div>
 
 </div>
