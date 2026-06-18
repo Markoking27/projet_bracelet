@@ -245,6 +245,7 @@ app.post('/api/bracelet/real', (req, res) => {
     bpm_avg:     body.bpm_avg,
     spo2:        body.spo2,
     ir:          body.ir,
+    temperature: body.temperature,
     humidity:    body.humidity,
     finger:      body.finger,
     gtag_count:  body.gtag_count,
