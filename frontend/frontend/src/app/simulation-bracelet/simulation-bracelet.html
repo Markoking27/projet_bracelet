@@ -74,6 +74,11 @@
     </div>
 
     <div class="real-metric">
+      <span class="metric-label">Température</span>
+      <span class="metric-value">{{ realBracelet.temperature }} °C</span>
+    </div>
+
+    <div class="real-metric">
       <span class="metric-label">Humidité</span>
       <span class="metric-value">{{ realBracelet.humidity }} %</span>
     </div>
@@ -256,9 +261,12 @@
 
           <div class="summary-metric">
             <div class="metric-label">Température</div>
-            <div class="metric-value">
-              {{ b.temperature !== undefined ? (b.temperature + ' °C') : (b.humidity !== undefined ? (b.humidity + ' %') : '--') }}
-            </div>
+            <div class="metric-value">{{ b.temperature !== undefined ? (b.temperature | number:'1.1-2') + ' °C' : '--' }}</div>
+          </div>
+
+          <div class="summary-metric">
+            <div class="metric-label">Humidité</div>
+            <div class="metric-value">{{ b.humidity !== undefined ? (b.humidity + ' %') : '--' }}</div>
           </div>
 
           <div class="summary-metric">
@@ -334,6 +342,11 @@
       <div class="detail-box" *ngIf="b.humidity !== undefined">
         <div class="detail-label">Humidité</div>
         <div class="detail-value">{{ b.humidity }} %</div>
+      </div>
+
+      <div class="detail-box" *ngIf="b.temperature !== undefined">
+        <div class="detail-label">Température</div>
+        <div class="detail-value">{{ b.temperature | number:'1.1-2' }} °C</div>
       </div>
 
 

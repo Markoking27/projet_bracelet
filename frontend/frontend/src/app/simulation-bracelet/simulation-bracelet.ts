@@ -223,7 +223,8 @@ fetchData(): void {
     });
     this.realBraceletService.getBracelet().subscribe({
       next: data => {
-        this.realBracelet = data; 
+        this.realBracelet = data;
+        console.log('📡 Bracelet réel reçu:', this.realBracelet);
         if (data) this.injectRealBracelet();
       },
       error: err => console.error('Erreur Bracelet réel', err)
@@ -245,12 +246,14 @@ fetchData(): void {
       spo2: this.realBracelet.spo2,
       humidity: this.realBracelet.humidity,
       gtag_count: this.realBracelet.gtag_count,
-      temperature: undefined,
+      temperature: this.realBracelet.temperature,
       time: this.realBracelet.time,
       isReal: true,
       x: position.x,
       y: position.y,
     };
+
+    console.log('💉 Bracelet injecté:', realAsSimulated);
 
     const idx = this.bracelets.findIndex(b => b.id === 0);
     if (idx >= 0) {

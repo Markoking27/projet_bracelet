@@ -7,7 +7,6 @@
 
       <div class="nav-links">
         <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Accueil</a>
-        <a routerLink="/real" routerLinkActive="active">Bracelet réel</a>
         <a routerLink="/liste-malaise" routerLinkActive="active">Liste des malaises</a>
         <a routerLink="/statistiques" routerLinkActive="active">Statistiques</a>
         <a routerLink="/events" routerLinkActive="active">Mes événements</a>
@@ -48,9 +47,6 @@
     <nav class="drawer-links">
       <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">
         <span class="drawer-icon">🏠</span> Accueil
-      </a>
-      <a routerLink="/real" routerLinkActive="active" (click)="closeMenu()">
-        <span class="drawer-icon">📡</span> Bracelet réel
       </a>
       <a routerLink="/liste-malaise" routerLinkActive="active" (click)="closeMenu()">
         <span class="drawer-icon">📋</span> Liste des malaises

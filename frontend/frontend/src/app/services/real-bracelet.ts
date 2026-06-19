@@ -14,6 +14,7 @@ export interface RealBracelet {
   bpm_avg: number;
   spo2: number;
   ir: number;
+  temperature: number;
   humidity: number;
   finger: boolean;
   gtag_count: number;
