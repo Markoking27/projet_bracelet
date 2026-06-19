@@ -1,49 +1,84 @@
 @if (auth.isAuthenticated()) {
   <nav class="navbar">
-    <div class="logo">
-      <img src="assets/logo2.png" alt="logo" />
+    <div class="navbar-inner">
+      <div class="logo">
+        <img src="assets/logo2.png" alt="logo" />
+      </div>
+
+      <div class="nav-links">
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Accueil</a>
+        <a routerLink="/real" routerLinkActive="active">Bracelet réel</a>
+        <a routerLink="/liste-malaise" routerLinkActive="active">Liste des malaises</a>
+        <a routerLink="/statistiques" routerLinkActive="active">Statistiques</a>
+        <a routerLink="/events" routerLinkActive="active">Mes événements</a>
+      </div>
+
+      <div class="nav-right">
+        @if (eventService.activeEvent(); as event) {
+          <div class="active-event">
+            <span class="event-dot"></span>
+            {{ event.nom }}
+          </div>
+        } @else {
+          <a routerLink="/events" class="no-event-link">Aucun événement actif</a>
+        }
+
+        <button class="btn-signal" routerLink="/formulaire-malaise">Signaler un malaise</button>
+
+        <div class="user-zone">
+          <span class="user-name">{{ auth.user()?.nom }}</span>
+          <button class="btn-logout" (click)="logout()">Déconnexion</button>
+        </div>
+      </div>
+
+      <button class="hamburger" (click)="toggleMenu()" [class.open]="menuOpen" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Sidebar drawer mobile -->
+  <div class="nav-backdrop" [class.open]="menuOpen" (click)="closeMenu()"></div>
+  <aside class="nav-drawer" [class.open]="menuOpen">
+    <div class="drawer-header">
+      <img src="assets/logo2.png" alt="logo" class="drawer-logo" />
+      <button class="drawer-close" (click)="closeMenu()">✕</button>
     </div>
 
-    <div class="nav-links">
-      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-        Accueil
+    <nav class="drawer-links">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">
+        <span class="drawer-icon">🏠</span> Accueil
       </a>
-      <a routerLink="/real" routerLinkActive="active">
-        Bracelet réel
+      <a routerLink="/real" routerLinkActive="active" (click)="closeMenu()">
+        <span class="drawer-icon">📡</span> Bracelet réel
       </a>
-      <a routerLink="/liste-malaise" routerLinkActive="active">
-        Liste des malaises
+      <a routerLink="/liste-malaise" routerLinkActive="active" (click)="closeMenu()">
+        <span class="drawer-icon">📋</span> Liste des malaises
       </a>
-      <a routerLink="/statistiques" routerLinkActive="active">
-        Statistiques
+      <a routerLink="/statistiques" routerLinkActive="active" (click)="closeMenu()">
+        <span class="drawer-icon">📊</span> Statistiques
       </a>
-      <a routerLink="/events" routerLinkActive="active">
-        Mes événements
+      <a routerLink="/events" routerLinkActive="active" (click)="closeMenu()">
+        <span class="drawer-icon">📅</span> Mes événements
       </a>
-    </div>
+    </nav>
 
-    <div class="nav-right">
+    <div class="drawer-footer">
       @if (eventService.activeEvent(); as event) {
-        <div class="active-event">
+        <div class="drawer-event">
           <span class="event-dot"></span>
           {{ event.nom }}
         </div>
-      } @else {
-        <a routerLink="/events" class="no-event-link">
-          Aucun événement actif
-        </a>
       }
-
-      <button class="btn-signal" routerLink="/formulaire-malaise">
+      <button class="btn-signal drawer-signal" routerLink="/formulaire-malaise" (click)="closeMenu()">
         Signaler un malaise
       </button>
-
-      <div class="user-zone">
+      <div class="drawer-user">
         <span class="user-name">{{ auth.user()?.nom }}</span>
         <button class="btn-logout" (click)="logout()">Déconnexion</button>
       </div>
     </div>
-  </nav>
+  </aside>
 }
 
 <router-outlet></router-outlet>

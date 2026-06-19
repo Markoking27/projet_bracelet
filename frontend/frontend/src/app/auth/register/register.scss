@@ -114,3 +114,8 @@ button[type='submit'] {
     &:hover { text-decoration: underline; }
   }
 }
+
+@media (max-width: 480px) {
+  .auth-page { padding: 16px; align-items: flex-start; padding-top: 40px; }
+  .auth-card { padding: 28px 20px; }
+}

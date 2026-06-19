@@ -165,3 +165,42 @@ tbody tr.gravite-moderee td:first-child { border-left: 3px solid #f59e0b; }
   padding: 48px 24px;
   font-size: 0.9rem;
 }
+
+/* ── Wrapper scroll horizontal ───────────────────────────────── */
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+
+  table {
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    min-width: 700px;
+  }
+}
+
+/* ── Responsive mobile ───────────────────────────────────────── */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 12px 32px;
+    margin-top: 16px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+  }
+
+  .event-filter {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+
+    select { min-width: 0; width: 100%; }
+  }
+}

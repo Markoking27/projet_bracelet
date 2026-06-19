@@ -4,6 +4,10 @@
   min-height: 100vh;
 }
 
+.dashboard-inner {
+  /* pas de max-width : on exploite toute la largeur disponible */
+}
+
 h1 {
   margin: 0;
   font-size: 3rem;
@@ -103,8 +107,8 @@ h1 {
 
 .dashboard-layout {
   display: grid;
-  grid-template-columns: 440px 1fr;
-  gap: 28px;
+  grid-template-columns: minmax(300px, 380px) 1fr;
+  gap: 24px;
   align-items: start;
 }
 
@@ -612,4 +616,78 @@ h1 {
   p {
     margin: 0 0 10px 0;
   }
+}
+
+/* ── Responsive mobile ────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .dashboard { padding: 16px 12px; overflow-x: hidden; }
+
+  h1 { font-size: 1.5rem; }
+  .subtitle { font-size: 0.9rem; margin-bottom: 16px; }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .stat-card { padding: 14px; border-radius: 12px; }
+  .stat-label { font-size: 0.82rem; margin-bottom: 6px; }
+  .stat-value { font-size: 1.5rem; }
+
+  .dashboard-layout {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  /* Cartes alertes + carte */
+  .alerts-card, .map-card {
+    padding: 14px;
+    border-radius: 14px;
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  .alerts-header, .map-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    margin-bottom: 12px;
+
+    h2 { font-size: 1rem; }
+    span { font-size: 0.82rem; }
+  }
+
+  .legend {
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 0.82rem;
+  }
+
+  .geo-map { height: 280px; }
+
+  .map-actions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+
+    button { width: 100%; justify-content: center; }
+  }
+
+  .all-bracelets-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .details-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .mini-charts { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .all-bracelets-grid { grid-template-columns: 1fr; }
+  .details-grid { grid-template-columns: 1fr; }
 }

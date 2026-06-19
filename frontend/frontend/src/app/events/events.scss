@@ -320,3 +320,14 @@
   color: #9ca3af;
   font-style: italic;
 }
+
+@media (max-width: 640px) {
+  .events-page { padding: 0 12px 32px; margin-top: 16px; }
+  .events-header { flex-direction: column; align-items: flex-start; }
+  .form-grid { grid-template-columns: 1fr; }
+  .form-actions { justify-content: stretch; button { width: 100%; } }
+  .event-card-header { flex-direction: column; gap: 8px; }
+  .event-stats { gap: 16px; flex-wrap: wrap; }
+  .event-actions { flex-wrap: wrap; gap: 8px; }
+  .btn-launch, .btn-close { width: 100%; text-align: center; }
+}

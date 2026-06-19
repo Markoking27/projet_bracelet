@@ -16,6 +16,10 @@ export class App implements OnInit {
   eventService = inject(EventService);
   private router = inject(Router);
 
+  menuOpen = false;
+  toggleMenu() { this.menuOpen = !this.menuOpen; }
+  closeMenu()  { this.menuOpen = false; }
+
   async ngOnInit() {
     if (this.auth.isAuthenticated()) {
       const valid = await this.auth.validateToken();
