@@ -47,11 +47,16 @@ def simulate_bracelet(index: int):
             accel=data["accel"],
             accel_variance=data["accel_variance"]
         )
-        # Envoie toujours (pour test)
         payload = {
             "id": index + 1,
             "level": monitor.current_level,
-            "malaise": monitor.malaise_type
+            "malaise": monitor.malaise_type,
+            "mode": sim.mode,
+            "bpm": round(sim.bpm, 1),
+            "spo2": round(sim.spo2, 1),
+            "temperature": round(sim.temp, 1),
+            "accel": round(data["accel"], 3),
+            "accelVariance": round(data["accel_variance"], 4),
         }
         try:
             requests.post(BACKEND_URL, json=payload)

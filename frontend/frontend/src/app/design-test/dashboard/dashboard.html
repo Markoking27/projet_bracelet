@@ -11,34 +11,33 @@
       </div>
     </div>
     <div class="vg-header__meta">
-      <div class="vg-status" [class.vg-status--live]="connected()" role="status"
-           [attr.aria-label]="connected() ? 'Connecté' : 'Hors ligne'">
+      <div class="vg-status" [class.vg-status--live]="connected()" role="status">
         <span class="vg-status__dot" aria-hidden="true"></span>
         <span class="vg-status__text">{{ connected() ? 'EN LIGNE' : 'HORS LIGNE' }}</span>
       </div>
-      <time class="vg-timestamp" aria-label="Dernière mise à jour">{{ lastUpdate() }}</time>
+      <time class="vg-timestamp">{{ lastUpdate() }}</time>
     </div>
   </header>
 
   <!-- ── KPI Bar ── -->
   <div class="vg-kpi-bar" role="region" aria-label="Indicateurs globaux">
-    <div class="vg-kpi" aria-label="{{ stats().total }} bracelets au total">
+    <div class="vg-kpi">
       <span class="vg-kpi__val">{{ stats().total }}</span>
       <span class="vg-kpi__label">TOTAL</span>
     </div>
-    <div class="vg-kpi vg-kpi--normal" aria-label="{{ stats().normal }} bracelets normaux">
+    <div class="vg-kpi vg-kpi--normal">
       <span class="vg-kpi__val">{{ stats().normal }}</span>
       <span class="vg-kpi__label">NORMAL</span>
     </div>
-    <div class="vg-kpi vg-kpi--attention" aria-label="{{ stats().attention }} en attention">
+    <div class="vg-kpi vg-kpi--attention">
       <span class="vg-kpi__val">{{ stats().attention }}</span>
       <span class="vg-kpi__label">ATTENTION</span>
     </div>
-    <div class="vg-kpi vg-kpi--alerte" aria-label="{{ stats().alerte }} en alerte">
+    <div class="vg-kpi vg-kpi--alerte">
       <span class="vg-kpi__val">{{ stats().alerte }}</span>
       <span class="vg-kpi__label">ALERTE</span>
     </div>
-    <div class="vg-kpi vg-kpi--urgence" aria-label="{{ stats().urgence }} en urgence">
+    <div class="vg-kpi vg-kpi--urgence">
       <span class="vg-kpi__val">{{ stats().urgence }}</span>
       <span class="vg-kpi__label">URGENCE</span>
     </div>
@@ -52,10 +51,86 @@
       <div class="vg-panel__label" id="map-label" aria-hidden="true">PLAN DE L'ÉVÉNEMENT</div>
       <div class="vg-panel__body vg-panel__body--map">
         <app-design-test-map
-          [bracelets]="bracelets()"
+          [bracelets]="allMapBracelets()"
           [selected]="selected()"
           (braceletClick)="selectBracelet($event)"
         />
+      </div>
+
+      <!-- ── Bande bracelets Python sous la carte ── -->
+      <div class="vg-strip">
+        <div class="vg-strip__label">
+          BRACELETS SIMULÉS — SERVEUR LOCAL
+          @if (simBracelets().length > 0) {
+            <span class="vg-strip__count">{{ simBracelets().length }} actifs</span>
+          }
+        </div>
+
+        <div class="vg-strip__row">
+
+          @if (simBracelets().length === 0) {
+            <div class="vg-strip__empty">Connexion au serveur Python (port 5000)…</div>
+          }
+
+          @for (b of simBracelets(); track b.id) {
+            <div style="
+              flex-shrink:0; width:220px; background:#1e293b;
+              border:1px solid rgba(148,163,184,0.2); border-radius:6px;
+              padding:12px; display:flex; flex-direction:column; gap:8px;
+              font-family:'Courier New',monospace;
+            "
+            [style.border-left]="b.level===0 ? '3px solid #22c55e' : b.level===1 ? '3px solid #f59e0b' : b.level===2 ? '3px solid #f97316' : '3px solid #ef4444'"
+            >
+              <!-- ID + niveau + mode -->
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <span style="color:#f1f5f9;font-size:16px;font-weight:700;letter-spacing:2px">B{{ padId(b.id) }}</span>
+                <span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;"
+                  [style.color]="b.level===0?'#22c55e':b.level===1?'#f59e0b':b.level===2?'#f97316':'#ef4444'"
+                  [style.background]="b.level===0?'rgba(34,197,94,.12)':b.level===1?'rgba(245,158,11,.12)':b.level===2?'rgba(249,115,22,.12)':'rgba(239,68,68,.12)'"
+                >{{ levelLabel(b.level) }}</span>
+              </div>
+
+              <div style="color:#94a3b8;font-size:10px;letter-spacing:1px">{{ modeLabel(b.mode) }}</div>
+
+              @if (b.malaise) {
+                <div style="color:#f97316;font-size:11px;background:rgba(249,115,22,.1);padding:3px 6px;border-radius:3px">⚠ {{ b.malaise }}</div>
+              }
+
+              <!-- Valeurs vitales -->
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px">
+                <div style="background:#0f172a;border-radius:4px;padding:6px;text-align:center">
+                  <div style="color:#ef4444;font-size:18px;font-weight:700;line-height:1">{{ fmt(b.bpm, 1) }}</div>
+                  <div style="color:#475569;font-size:9px;letter-spacing:1px;margin-top:2px">BPM</div>
+                </div>
+                <div style="background:#0f172a;border-radius:4px;padding:6px;text-align:center">
+                  <div style="color:#22d3ee;font-size:18px;font-weight:700;line-height:1">{{ fmt(b.spo2, 1) }}</div>
+                  <div style="color:#475569;font-size:9px;letter-spacing:1px;margin-top:2px">SpO₂%</div>
+                </div>
+                <div style="background:#0f172a;border-radius:4px;padding:6px;text-align:center">
+                  <div style="color:#f59e0b;font-size:18px;font-weight:700;line-height:1">{{ fmt(b.temperature, 1) }}</div>
+                  <div style="color:#475569;font-size:9px;letter-spacing:1px;margin-top:2px">TEMP°C</div>
+                </div>
+              </div>
+
+              <!-- Données secondaires -->
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <div>
+                  <div style="color:#475569;font-size:9px;letter-spacing:1px">ACCEL</div>
+                  <div style="color:#94a3b8;font-size:12px">{{ fmt(b.accel, 2) }}g</div>
+                </div>
+                <div>
+                  <div style="color:#475569;font-size:9px;letter-spacing:1px">VAR</div>
+                  <div style="color:#94a3b8;font-size:12px">{{ fmt(b.accelVariance, 3) }}</div>
+                </div>
+                <div>
+                  <div style="color:#475569;font-size:9px;letter-spacing:1px">POS</div>
+                  <div style="color:#94a3b8;font-size:12px">{{ b.x }},{{ b.y }}</div>
+                </div>
+              </div>
+            </div>
+          }
+
+        </div>
       </div>
     </section>
 
@@ -77,8 +152,6 @@
               [class.vg-bracelet-card--selected]="selected()?.id === b.id"
               (click)="selectBracelet(b)"
               role="listitem"
-              [attr.aria-label]="'Bracelet ' + b.id + ' — ' + levelLabel(b.level) + ', BPM ' + b.bpm + ', SpO₂ ' + b.spo2 + '%'"
-              [attr.aria-pressed]="selected()?.id === b.id"
             >
               <div class="vg-bc-header">
                 <span class="vg-bc-id">B{{ padId(b.id) }}</span>
@@ -116,7 +189,7 @@
         </div>
       </section>
 
-      <!-- Detail panel (slides in) -->
+      <!-- Detail panel -->
       @if (selected()) {
         <aside class="vg-detail-panel" aria-label="Détails du bracelet sélectionné">
           <app-design-test-detail

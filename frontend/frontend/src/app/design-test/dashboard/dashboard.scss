@@ -251,10 +251,288 @@
   &__body {
     flex: 1;
     overflow: hidden;
+    min-height: 0;
 
     &--map {
       padding: 0.75rem;
     }
+  }
+}
+
+// ── Cartes simulation Python (vg-sim-card) ────────────────
+.vg-sim-card {
+  flex-shrink: 0;
+  width: 230px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 0.9rem;
+  background: var(--vg-bg);
+  border: 1px solid var(--vg-border);
+  border-radius: 4px;
+
+  &--attention { border-left: 3px solid var(--vg-attention); }
+  &--alerte    { border-left: 3px solid var(--vg-alerte); }
+  &--urgence {
+    border-left: 3px solid var(--vg-urgence);
+    animation: vg-urgence-glow 1.5s ease-in-out infinite;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  &__id {
+    font-family: var(--vg-font-code);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--vg-text);
+    letter-spacing: 2px;
+  }
+
+  &__badge {
+    font-family: var(--vg-font-code);
+    font-size: 0.48rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    padding: 0.1rem 0.35rem;
+    border-radius: 2px;
+
+    &--normal    { color: var(--vg-normal);    background: rgba(34,197,94,0.12); }
+    &--attention { color: var(--vg-attention); background: rgba(245,158,11,0.12); }
+    &--alerte    { color: var(--vg-alerte);    background: rgba(249,115,22,0.12); }
+    &--urgence   { color: var(--vg-urgence);   background: rgba(239,68,68,0.12); }
+  }
+
+  &__mode {
+    font-family: var(--vg-font-code);
+    font-size: 0.55rem;
+    color: var(--vg-text-dim);
+    letter-spacing: 1px;
+    margin-left: auto;
+  }
+
+  &__malaise {
+    font-family: var(--vg-font-code);
+    font-size: 0.62rem;
+    color: var(--vg-alerte);
+    background: rgba(249,115,22,0.1);
+    border-radius: 2px;
+    padding: 0.2rem 0.4rem;
+    letter-spacing: 0.5px;
+  }
+
+  // Vitales principales (grandes valeurs)
+  &__vitals {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  &__vital {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.1rem;
+    padding: 0.35rem 0.2rem;
+    border-radius: 3px;
+    background: var(--vg-surface);
+  }
+
+  &__vval {
+    font-family: var(--vg-font-code);
+    font-size: 1.1rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+
+  &__vlabel {
+    font-family: var(--vg-font-code);
+    font-size: 0.45rem;
+    letter-spacing: 2px;
+    color: var(--vg-text-dim);
+  }
+
+  &__vital--bpm  .vg-sim-card__vval { color: #ef4444; }
+  &__vital--spo2 .vg-sim-card__vval { color: #22d3ee; }
+  &__vital--temp .vg-sim-card__vval { color: #f59e0b; }
+
+  // Données secondaires
+  &__secondary {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+
+  &__sec-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.05rem;
+  }
+
+  &__sec-label {
+    font-family: var(--vg-font-code);
+    font-size: 0.42rem;
+    letter-spacing: 1.5px;
+    color: var(--vg-text-dim);
+  }
+
+  &__sec-val {
+    font-family: var(--vg-font-code);
+    font-size: 0.68rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--vg-text-mid);
+  }
+}
+
+// ── Bracelet strip (sous la carte) ────────────────────────
+.vg-strip {
+  flex-shrink: 0;
+  border-top: 1px solid var(--vg-border);
+  background: var(--vg-surface);
+
+  &__label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.4rem 1rem;
+    font-family: var(--vg-font-code);
+    font-size: 0.5rem;
+    letter-spacing: 3px;
+    color: var(--vg-text-dim);
+    border-bottom: 1px solid var(--vg-border);
+  }
+
+  &__count {
+    font-size: 0.5rem;
+    color: var(--vg-normal);
+    letter-spacing: 1px;
+  }
+
+  &__row {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.6rem 0.75rem;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--vg-border-hi) transparent;
+  }
+
+  &__empty {
+    font-family: var(--vg-font-code);
+    font-size: 0.7rem;
+    color: var(--vg-text-dim);
+    letter-spacing: 1px;
+    padding: 0.5rem 0;
+    align-self: center;
+  }
+}
+
+.vg-strip-card {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.65rem 0.85rem;
+  background: var(--vg-bg);
+  border: 1px solid var(--vg-border);
+  border-radius: 4px;
+  min-width: 160px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 150ms ease, background 150ms ease;
+
+  &:hover { border-color: var(--vg-border-hi); }
+
+  &--selected {
+    border-color: var(--vg-blue) !important;
+    background: var(--vg-blue-dim) !important;
+  }
+  &--attention { border-left: 3px solid var(--vg-attention); }
+  &--alerte    { border-left: 3px solid var(--vg-alerte); }
+  &--urgence {
+    border-left: 3px solid var(--vg-urgence);
+    animation: vg-urgence-glow 1.5s ease-in-out infinite;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  &__id {
+    font-family: var(--vg-font-code);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--vg-text);
+    letter-spacing: 2px;
+  }
+
+  &__badge {
+    font-family: var(--vg-font-code);
+    font-size: 0.48rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    padding: 0.1rem 0.35rem;
+    border-radius: 2px;
+
+    &--normal    { color: var(--vg-normal);    background: rgba(34,197,94,0.12); }
+    &--attention { color: var(--vg-attention); background: rgba(245,158,11,0.12); }
+    &--alerte    { color: var(--vg-alerte);    background: rgba(249,115,22,0.12); }
+    &--urgence   { color: var(--vg-urgence);   background: rgba(239,68,68,0.12); }
+  }
+
+  &__mode {
+    font-family: var(--vg-font-code);
+    font-size: 0.58rem;
+    color: var(--vg-text-mid);
+    letter-spacing: 1px;
+  }
+
+  &__vitals {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  &__vital {
+    display: flex;
+    flex-direction: column;
+    gap: 0.05rem;
+  }
+
+  &__vl {
+    font-family: var(--vg-font-code);
+    font-size: 0.45rem;
+    letter-spacing: 1.5px;
+    color: var(--vg-text-dim);
+  }
+
+  &__vv {
+    font-family: var(--vg-font-code);
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+
+    &--bpm  { color: #ef4444; }
+    &--spo2 { color: #22d3ee; }
+    &--temp { color: #f59e0b; }
+    &--pos  { color: var(--vg-text-dim); font-size: 0.65rem; }
+  }
+
+  &__malaise {
+    font-family: var(--vg-font-code);
+    font-size: 0.6rem;
+    color: var(--vg-alerte);
+    letter-spacing: 0.5px;
+    padding: 0.15rem 0.35rem;
+    background: rgba(249,115,22,0.08);
+    border-radius: 2px;
   }
 }
 
